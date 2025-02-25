@@ -1,29 +1,97 @@
-/* Basic styling - you can customize this */
+/* style.css */
+
 body {
     font-family: sans-serif;
-    margin: 20px;
+    margin: 0; /* Remove default body margin */
+    padding: 0;
 }
 
-button {
+header {
+    background-color: #f0f0f0; /* Light gray background */
     padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+    display: flex;
+    justify-content: space-between; /* Space out title and login */
+    align-items: center; /* Vertically center items */
+    border-bottom: 1px solid #ddd;
+}
+
+h1 {
+    margin: 0; /* Remove default h1 margin */
+    font-size: 2em;
+}
+
+#login-container {
+   display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Vertically center the button/user info */
+    gap: 10px;
+}
+
+#login-button {
+    background-color: #4CAF50; /* Green */
     border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
     cursor: pointer;
-    margin-bottom: 10px;
+    border-radius: 4px;
 }
 
-button:hover {
-    background-color: #3e8e41;
+#loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 2s linear infinite;
+    display: inline-block; /* Important for positioning */
+    margin-left: 10px; /* Add some space */
 }
 
-pre {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border: 1px solid #ccc;
-    overflow: auto; /* For long JSON data */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#user-info {
+ /*display: flex;*/  /*Don't use display flex as children are added dynamically*/
+    align-items: center; /* Vertically center items */
 }
 
-#userInfo {
-    margin-top: 20px;
+#user-info p {
+    margin: 0 5px 0 0;  /*Remove bottom margin and add a right margin to separate elements*/
+    display: inline-block; /*Ensure elements stay on one line*/
+}
+
+#user-info img {
+    border-radius: 50%;
+    vertical-align: middle; /* Important for aligning with text */
+    margin-right: 10px;
+    width: 30px; /* Smaller profile picture */
+    height: 30px;
+}
+
+#user-info button {
+    background-color: #f44336; /* Red */
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+#error-message {
+    margin-top: 10px;
+    color: red;
+    padding: 0 20px; /* Consistent padding */
+}
+
+main {
+    padding: 20px; /* Add padding to the main content area */
 }
