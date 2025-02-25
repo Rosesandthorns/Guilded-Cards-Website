@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Callback</title>
+</head>
+<body>
+    <h1>Logging in...</h1>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+
+        if (code) {
+            document.body.innerHTML = `<p>Success! Code: ${code}</p>`;
+            // You need a backend service to exchange this code for an access token
+        } else {
+            document.body.innerHTML = "<p>Login failed.</p>";
+        }
+    </script>
+</body>
+</html>
