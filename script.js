@@ -1,7 +1,7 @@
 const domain = 'dev-ybciamkuxjx0b751.us.auth0.com';
 const clientId = 'MGyCF2Fz3BH019yEPPRRiyr9ruYwbLgf';
 const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/';
-// Help me
+
 let auth0 = null;
 
 const configureClient = async () => {
