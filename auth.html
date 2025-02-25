@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auth0 Callback</title>
+    <!-- Load Auth0 SPA SDK -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0.0/auth0-spa-js.production.js"></script>
 </head>
 <body>
@@ -13,11 +14,17 @@
 
         // Initialize Auth0 client
         const initAuth0 = async () => {
-            auth0 = await createAuth0Client({
-                domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain (e.g., your-tenant.auth0.com)
-                client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
-                redirect_uri: window.location.href  // The current URL for handling the callback
-            });
+            // Check if the SDK is loaded
+            if (window.createAuth0Client) {
+                auth0 = await createAuth0Client({
+                    domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain
+                    client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
+                    redirect_uri: window.location.href  // The current URL for handling the callback
+                });
+                console.log("Auth0 client initialized.");
+            } else {
+                console.error("Auth0 SDK not loaded correctly.");
+            }
         };
 
         // Handle the redirect callback from Auth0
@@ -32,7 +39,10 @@
             initAuth0().then(() => {
                 handleRedirectCallback(); // Handle the redirect callback when code is found
             });
+        } else {
+            initAuth0(); // Initialize Auth0 client if no code is found
         }
+
     </script>
 </body>
 </html>
