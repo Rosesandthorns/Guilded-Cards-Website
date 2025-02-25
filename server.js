@@ -1,66 +1,62 @@
-const express = require('express');
-const session = require('express-session');
-const dotenv = require('dotenv');
-const passport = require('passport');
-const Auth0Strategy = require('passport-auth0').Strategy; // Using passport-auth0
+let auth0 = null;
 
-dotenv.config();
+// Initialize Auth0 client
+const initAuth0 = async () => {
+    try {
+        auth0 = await createAuth0Client({
+            domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain
+            client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
+            redirect_uri: window.location.href,  // The current URL for handling the callback
+        });
+        checkAuthentication();
+    } catch (error) {
+        console.error('Error initializing Auth0:', error);
+    }
+};
 
-const app = express();
+// Check if the user is authenticated
+const checkAuthentication = async () => {
+    try {
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (isAuthenticated) {
+            const user = await auth0.getUser();
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'inline-block';
+            document.getElementById('profile').textContent = JSON.stringify(user, null, 2);
+        } else {
+            document.getElementById('loginButton').style.display = 'inline-block';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+    }
+};
 
-// Session middleware
-app.use(session({ secret: 'your secret', resave: false, saveUninitialized: false }));
-app.use(passport.initialize());
-app.use(passport.session());
+// Handle login
+const login = async () => {
+    try {
+        await auth0.loginWithRedirect({
+            connection: 'github',  // Use GitHub as a social login provider
+        });
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+};
 
-// Initialize Passport with Auth0 Strategy
-passport.use(new Auth0Strategy({
-    domain: process.env.AUTH0_DOMAIN,  // Auth0 domain, e.g., 'your-tenant.auth0.com'
-    clientID: process.env.AUTH0_CLIENT_ID,  // Auth0 Client ID
-    clientSecret: process.env.AUTH0_CLIENT_SECRET,  // Auth0 Client Secret
-    callbackURL: process.env.AUTH0_CALLBACK_URL || "http://localhost:3000/callback"
-  },
-  function(accessToken, refreshToken, extraParams, profile, done) {
-    return done(null, profile);  // You can store profile info here
-  }
-));
+// Handle logout
+const logout = async () => {
+    try {
+        await auth0.logout({
+            returnTo: window.location.href  // Redirect to home page after logout
+        });
+    } catch (error) {
+        console.error('Error during logout:', error);
+    }
+};
 
-// Serialize and deserialize user
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
+// Event listeners for login and logout
+document.getElementById('loginButton').onclick = login;
+document.getElementById('logoutButton').onclick = logout;
 
-// Home route with a basic website
-app.get('/', (req, res) => {
-  res.send(`
-    <h1>Welcome</h1>
-    ${req.isAuthenticated() ? `
-      <p>Hello, ${req.user.displayName}!</p>
-      <a href="/logout">Logout</a>
-    ` : `
-      <a href="/auth/auth0">Login with Auth0 (GitHub)</a>
-    `}
-  `);
-});
-
-// Start Auth0 authentication (using GitHub as a social connection)
-app.get('/auth/auth0', passport.authenticate('auth0', {
-  scope: 'openid profile email'
-}));
-
-// Auth0 callback URL
-app.get('/callback', 
-  passport.authenticate('auth0', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/');
-  }
-);
-
-// Logout route
-app.get('/logout', (req, res) => {
-  req.logout(() => {
-    res.redirect('/');
-  });
-});
-
-// Start the server
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+// Initialize Auth0 client on page load
+initAuth0();
