@@ -4,10 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards</title>
-    <script defer src="script.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0.0/auth0-spa-js.production.js"></script>
 </head>
 <body>
     <h1>Welcome to Guilded Cards</h1>
-    <button id="github-login">Login with GitHub</button>
+    <button id="loginButton">Login with GitHub</button>
+    <button id="logoutButton" style="display:none;">Logout</button>
+    <h2>User Profile:</h2>
+    <pre id="profile"></pre>
+
+    <script>
+        let auth0 = null;
+
+        const initAuth0 = async () => {
+            auth0 = await createAuth0Client({
+                domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain (e.g., your-tenant.auth0.com)
+                client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
+                redirect_uri: window.location.href,  // The current URL for handling the callback
+            });
+        };
+
+        const checkAuthentication = async () => {
+            const isAuthenticated = await auth0.isAuthenticated();
+
+            if (isAuthenticated) {
+                const user = await auth0.getUser();
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('logoutButton').style.display = 'inline-block';
+                document.getElementById('profile').textContent = JSON.stringify(user, null, 2);
+            } else {
+                document.getElementById('loginButton').style.display = 'inline-block';
+                document.getElementById('logoutButton').style.display = 'none';
+            }
+        };
+
+        const login = async () => {
+            await auth0.loginWithRedirect({
+                connection: 'github',  // Use GitHub as a social login provider
+            });
+        };
+
+        const logout = async () => {
+            await auth0.logout({
+                returnTo: window.location.href  // Redirect to home page after logout
+            });
+        };
+
+        document.getElementById('loginButton').onclick = login;
+        document.getElementById('logoutButton').onclick = logout;
+
+        initAuth0().then(() => {
+            checkAuthentication();
+        });
+    </script>
 </body>
 </html>
