@@ -3,8 +3,8 @@ const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
     const { code } = JSON.parse(event.body);
-    const clientID = process.env.GITHUB_CLIENT_ID;
-    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    const clientID = process.env.GITHUB_CLIENT_ID; // From Netlify environment variable
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET; // From Netlify environment variable.  YOU MUST SET THIS.
 
     try {
         const response = await fetch('https://github.com/login/oauth/access_token', {
