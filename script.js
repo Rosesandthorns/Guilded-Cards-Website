@@ -2,8 +2,8 @@
 
 // --- Configuration (Replace with your actual values!) ---
 const githubClientId = 'Ov23liQXExMKV1W03hqt'; //  From your GitHub OAuth App.
-const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/';      //  Your Authorization callback URL.
-const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token';
+const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; //  Your Authorization callback URL.
+const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; //  KEEP THIS AS IS (see below)
 
 // --- Utility Functions ---
 
