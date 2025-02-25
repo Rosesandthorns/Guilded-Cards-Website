@@ -1,11 +1,11 @@
-// server.js
 const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
-const GitHubStrategy = require('passport-github2').Strategy;
 const dotenv = require('dotenv');
+const passport = require('passport');
+const Auth0Strategy = require('passport-auth0').Strategy; // Using passport-auth0
 
 dotenv.config();
+
 const app = express();
 
 // Session middleware
@@ -13,41 +13,43 @@ app.use(session({ secret: 'your secret', resave: false, saveUninitialized: false
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Initialize Passport with Auth0 Strategy
+passport.use(new Auth0Strategy({
+    domain: process.env.AUTH0_DOMAIN,  // Auth0 domain, e.g., 'your-tenant.auth0.com'
+    clientID: process.env.AUTH0_CLIENT_ID,  // Auth0 Client ID
+    clientSecret: process.env.AUTH0_CLIENT_SECRET,  // Auth0 Client Secret
+    callbackURL: process.env.AUTH0_CALLBACK_URL || "http://localhost:3000/callback"
+  },
+  function(accessToken, refreshToken, extraParams, profile, done) {
+    return done(null, profile);  // You can store profile info here
+  }
+));
+
 // Serialize and deserialize user
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
-
-// Configure GitHub strategy
-passport.use(new GitHubStrategy({
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/github/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
-    // Here you can store profile info in your DB if needed
-    return done(null, profile);
-  }
-));
 
 // Home route with a basic website
 app.get('/', (req, res) => {
   res.send(`
     <h1>Welcome</h1>
     ${req.isAuthenticated() ? `
-      <p>Hello, ${req.user.username}!</p>
+      <p>Hello, ${req.user.displayName}!</p>
       <a href="/logout">Logout</a>
     ` : `
-      <a href="/auth/github">Login with GitHub</a>
+      <a href="/auth/auth0">Login with Auth0 (GitHub)</a>
     `}
   `);
 });
 
-// Start GitHub authentication
-app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+// Start Auth0 authentication (using GitHub as a social connection)
+app.get('/auth/auth0', passport.authenticate('auth0', {
+  scope: 'openid profile email'
+}));
 
-// GitHub callback URL
-app.get('/auth/github/callback', 
-  passport.authenticate('github', { failureRedirect: '/' }),
+// Auth0 callback URL
+app.get('/callback', 
+  passport.authenticate('auth0', { failureRedirect: '/' }),
   (req, res) => {
     res.redirect('/');
   }
