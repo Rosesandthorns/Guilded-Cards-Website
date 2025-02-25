@@ -1,9 +1,9 @@
 // script.js
 
-// --- Configuration (Replace with your actual values!) ---
-const githubClientId = 'Ov23liQXExMKV1W03hqt'; //  From your GitHub OAuth App.
-const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; //  Your Authorization callback URL.
-const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; //  KEEP THIS AS IS (see below)
+// --- Configuration ---
+const githubClientId = 'Ov23liQXExMKV1W03hqt'; // Your Client ID (as provided)
+const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; // Correct redirect URI for your GitHub Pages site
+const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; // DO NOT CHANGE THIS
 
 // --- Utility Functions ---
 
@@ -116,11 +116,11 @@ function showLoadingIndicator() {
 }
 // --- Main Execution Flow ---
 async function handleLogin() {
-		//set up login button.  Do this here so we don't need DOMContentLoaded
-		const loginButton = document.getElementById('login-button');
-		if(loginButton){
-				loginButton.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-		}
+    //set up login button.  Do this here so we don't need DOMContentLoaded
+    const loginButton = document.getElementById('login-button');
+    if(loginButton){
+        loginButton.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    }
 
     const code = getCodeFromURL();
 
