@@ -1,0 +1,29 @@
+/* Basic styling - you can customize this */
+body {
+    font-family: sans-serif;
+    margin: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+button:hover {
+    background-color: #3e8e41;
+}
+
+pre {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    overflow: auto; /* For long JSON data */
+}
+
+#userInfo {
+    margin-top: 20px;
+}
