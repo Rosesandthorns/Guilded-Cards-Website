@@ -11,6 +11,7 @@
     <script>
         let auth0 = null;
 
+        // Initialize Auth0 client
         const initAuth0 = async () => {
             auth0 = await createAuth0Client({
                 domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain (e.g., your-tenant.auth0.com)
@@ -19,19 +20,19 @@
             });
         };
 
+        // Handle the redirect callback from Auth0
         const handleRedirectCallback = async () => {
             const result = await auth0.handleRedirectCallback();
             window.history.replaceState({}, document.title, "/"); // Clean the URL after handling callback
             window.location.href = "/"; // Redirect to home page after successful login
         };
 
+        // Check for the 'code' in the URL, indicating a successful login redirect
         if (window.location.search.includes('code=')) {
             initAuth0().then(() => {
-                handleRedirectCallback();
+                handleRedirectCallback(); // Handle the redirect callback when code is found
             });
         }
-
-        initAuth0(); // Initialize Auth0 client
     </script>
 </body>
 </html>
