@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0.0/auth0-spa-js.production.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0.3/auth0-spa-js.production.js"></script>
 </head>
 <body>
     <h1>Welcome to Guilded Cards</h1>
@@ -19,68 +19,49 @@
 
         // Initialize Auth0 client
         const initAuth0 = async () => {
-            try {
-                // Make sure the SDK is loaded and the client is initialized
-                auth0 = await createAuth0Client({
-                    domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain
-                    client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
-                    redirect_uri: window.location.href,  // The current URL for handling the callback
-                });
-                console.log('Auth0 client initialized');
-            } catch (error) {
-                console.error('Error initializing Auth0:', error);
-            }
+            auth0 = await createAuth0Client({
+                domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain
+                client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
+                redirect_uri: window.location.href,  // The current URL for handling the callback
+            });
+            checkAuthentication();
         };
 
         // Check if the user is authenticated
         const checkAuthentication = async () => {
-            try {
-                const isAuthenticated = await auth0.isAuthenticated();
+            const isAuthenticated = await auth0.isAuthenticated();
 
-                if (isAuthenticated) {
-                    const user = await auth0.getUser();
-                    document.getElementById('loginButton').style.display = 'none';
-                    document.getElementById('logoutButton').style.display = 'inline-block';
-                    document.getElementById('profile').textContent = JSON.stringify(user, null, 2);
-                } else {
-                    document.getElementById('loginButton').style.display = 'inline-block';
-                    document.getElementById('logoutButton').style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error checking authentication:', error);
+            if (isAuthenticated) {
+                const user = await auth0.getUser();
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('logoutButton').style.display = 'inline-block';
+                document.getElementById('profile').textContent = JSON.stringify(user, null, 2);
+            } else {
+                document.getElementById('loginButton').style.display = 'inline-block';
+                document.getElementById('logoutButton').style.display = 'none';
             }
         };
 
         // Handle login
         const login = async () => {
-            try {
-                await auth0.loginWithRedirect({
-                    connection: 'github',  // Use GitHub as a social login provider
-                });
-            } catch (error) {
-                console.error('Error during login:', error);
-            }
+            await auth0.loginWithRedirect({
+                connection: 'github',  // Use GitHub as a social login provider
+            });
         };
 
         // Handle logout
         const logout = async () => {
-            try {
-                await auth0.logout({
-                    returnTo: window.location.href  // Redirect to home page after logout
-                });
-            } catch (error) {
-                console.error('Error during logout:', error);
-            }
+            await auth0.logout({
+                returnTo: window.location.href  // Redirect to home page after logout
+            });
         };
 
         // Set up the event listeners for login and logout
         document.getElementById('loginButton').onclick = login;
         document.getElementById('logoutButton').onclick = logout;
 
-        // Initialize Auth0 client and check authentication status
-        initAuth0().then(() => {
-            checkAuthentication();
-        }).catch((error) => {
+        // Initialize Auth0 client
+        initAuth0().catch(error => {
             console.error('Error initializing Auth0:', error);
         });
     </script>
