@@ -2,7 +2,11 @@
 
 (async () => {
     try {
-        const auth0 = await createAuth0Client({
+        if (!window.createAuth0Client) {
+            throw new Error("Auth0 SDK not loaded.");
+        }
+
+        const auth0 = await window.createAuth0Client({
             domain: "dev-ybciamkuxjx0b751.us.auth0.com",
             clientId: "MGyCF2Fz3BH019yEPPRRiyr9ruYwbLgf",
             authorizationParams: {
@@ -49,7 +53,7 @@
             window.history.replaceState({}, document.title, "/");
         }
     } catch (error) {
-        console.error("Auth0 SDK failed to load:", error);
+        console.error("Auth0 error:", error);
+        document.getElementById("profile-data").innerText = "Auth0 error. Check console.";
     }
-
 })();
