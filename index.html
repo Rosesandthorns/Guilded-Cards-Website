@@ -1,28 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guilded Cards Website</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script src="script.js" defer></script>
+  <title>GitHub Login Example</title>
 </head>
 <body>
-    <header>
-        <h1>Guilded Cards Website</h1>
-        <button id="loginBtn" style="display: none;">Login</button>
-        <button id="logoutBtn" style="display: none;">Logout</button>
-    </header>
+  <a id="login-button" href="https://github.com/login/oauth/authorize?client_id=YOUR_CLIENT_ID">
+    Login with GitHub
+  </a>
 
-    <main>
-        <div id="content">
-            <p>Welcome!  Please log in to see more.</p>
-            <div id="userInfo" style="display: none;">
-              <h2>User Profile</h2>
-              <pre id="profileData"></pre>
-            </div>
-        </div>
-    </main>
+  <div id="user-info"></div>
+
+  <script>
+    // --- Step 3: Get the code from the URL ---
+    function getCodeFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('code');
+    }
+
+    // --- Step 4d: Call the serverless function ---
+    async function exchangeCodeForToken(code) {
+        try {
+            const response = await fetch('/.netlify/functions/exchange-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+            console.error("Error from serverless function:", data.error);
+            } else {
+            // Success!  We have the access token!
+            const accessToken = data.access_token;
+            console.log("Access token:", accessToken); // For debugging. Remove in production.
+
+            // Now you can use the access token to get user info (Step 5).
+            getUserInfo(accessToken);
+            }
+        } catch (error) {
+            console.error("Error calling serverless function:", error);
+        }
+    }
+
+    // --- Step 5: Get user information ---
+    async function getUserInfo(accessToken) {
+      try {
+        const response = await fetch('https://api.github.com/user', {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        });
+
+        const userData = await response.json();
+        console.log("User data:", userData); // For debugging.
+
+        // Store the user data and update the UI
+        localStorage.setItem('githubUser', JSON.stringify(userData));
+        displayUser(userData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    }
+
+    // --- Step 6: Display user information and handle logout ---
+        function displayUser(user) {
+        const loginButton = document.getElementById('login-button'); // Assuming you have an element with this ID
+        if(loginButton){
+            loginButton.style.display = 'none'; // Hide login button
+        }
+
+        const userInfo = document.getElementById('user-info'); // Assuming you have an element with this ID
+        if(userInfo)
+        {
+            userInfo.innerHTML = `
+                <p>Logged in as ${user.login}</p>
+                <img src="${user.avatar_url}" alt="Profile Picture" width="50">
+                <button onclick="logout()">Logout</button>
+            `;
+        }
+    }
+
+    // Add this function for logout
+    function logout() {
+    localStorage.removeItem('githubUser'); // Remove user data
+    window.location.reload(); // Reload the page to reset the UI
+    }
+
+    //check local storage on load and display data if present.
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const storedUser = localStorage.getItem('githubUser');
+        if (storedUser) {
+            const user = JSON.parse(storedUser);
+            displayUser(user);
+        }
+        else{
+            const code = getCodeFromURL();
+            if (code) {
+                exchangeCodeForToken(code);
+            }
+        }
+    });
+
+  </script>
 </body>
 </html>
