@@ -2,8 +2,8 @@
 
 // --- Configuration ---
 const githubClientId = 'Ov23liQXExMKV1W03hqt'; // Your GitHub Client ID
-const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; //  MUST MATCH GitHub OAuth App Settings
-const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; // Correct Netlify function path
+const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; // Correct redirect URI
+const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; // Netlify function path
 
 // --- Utility Functions ---
 
@@ -74,7 +74,7 @@ function displayUser(user) {
         loader.style.display = 'none';
     }
     if (loginButton) {
-        loginButton.style.display = 'none';
+        loginButton.style.display = 'none'; // Hide login button
     }
 
     if (userInfo) {
@@ -83,14 +83,14 @@ function displayUser(user) {
             <img src="${user.avatar_url}" alt="Profile Picture" width="50">
             <button onclick="logout()">Logout</button>
         `;
-        userInfo.style.display = 'block';
+        userInfo.style.display = 'block'; // Show user info
     }
 }
 
 function logout() {
     localStorage.removeItem('githubUser');
     localStorage.removeItem('githubAccessToken');
-    window.location.href = window.location.pathname;
+    window.location.href = window.location.pathname; // Redirect to same page
 }
 
 function displayError(message) {
@@ -100,6 +100,7 @@ function displayError(message) {
         errorElement.style.display = 'block';
     }
 }
+
 function hideError(){
     const errorElement = document.getElementById('error-message');
     if (errorElement) {
@@ -114,17 +115,14 @@ function showLoadingIndicator() {
         loader.style.display = 'inline-block';
     }
 }
+
 // --- Main Execution Flow ---
 async function handleLogin() {
-    //set up login button.  Do this here so we don't need DOMContentLoaded
     const loginButton = document.getElementById('login-button');
-    if(loginButton){
-        loginButton.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    }
-
     const code = getCodeFromURL();
 
     if (code) {
+        // We have a code, so we're in the callback flow.
         showLoadingIndicator();
         hideError();
         const accessToken = await exchangeCodeForToken(code);
@@ -139,13 +137,20 @@ async function handleLogin() {
             }
         }
     } else {
+        // No code, check if the user is already logged in.
         const storedUser = localStorage.getItem('githubUser');
         if (storedUser) {
             const user = JSON.parse(storedUser);
             displayUser(user);
+        } else {
+            // User is NOT logged in, *now* set up the login button.
+            if (loginButton) {
+                loginButton.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+            }
         }
     }
 }
+
 
 // --- Event Listener ---
 // Call handleLogin when the DOM is fully loaded.  Not needed if you use DOMContentLoaded
