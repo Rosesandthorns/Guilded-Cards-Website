@@ -1,17 +1,28 @@
-// Filename: index.html
-
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
-    <title>Auth0 Example</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guilded Cards</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Welcome!</h1>
-    <button id="login">Login</button>
-    <button id="logout" style="display: none;">Logout</button>
-    <pre id="profile-data"></pre>
+    <header>
+        <h1>Guilded Cards Website</h1>
+        <button id="loginBtn" style="display: none;">Login</button>
+        <button id="logoutBtn" style="display: none;">Logout</button>
+    </header>
 
-    <script src="auth.js"></script>
+    <main>
+        <div id="content">
+            <p>Welcome!  Please log in to see more.</p>
+            <div id="userInfo" style="display: none;">
+              <h2>User Profile</h2>
+              <pre id="profileData"></pre>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
