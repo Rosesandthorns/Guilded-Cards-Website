@@ -1,9 +1,9 @@
 // script.js
 
 // --- Configuration ---
-const githubClientId = 'Ov23liQXExMKV1W03hqt'; // Your Client ID (as provided)
-const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; // Correct redirect URI for your GitHub Pages site
-const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; // DO NOT CHANGE THIS
+const githubClientId = 'Ov23liQXExMKV1W03hqt'; // Your GitHub Client ID
+const redirectUri = 'https://rosesandthorns.github.io/Guilded-Cards-Website/'; //  MUST MATCH GitHub OAuth App Settings
+const serverlessFunctionEndpoint = '/.netlify/functions/exchange-token'; // Correct Netlify function path
 
 // --- Utility Functions ---
 
