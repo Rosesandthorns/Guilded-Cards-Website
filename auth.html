@@ -4,45 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auth0 Callback</title>
-    <!-- Load Auth0 SPA SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0.0/auth0-spa-js.production.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0.3/auth0-spa-js.production.js"></script>
 </head>
 <body>
     <h1>Logging in...</h1>
     <script>
         let auth0 = null;
 
-        // Initialize Auth0 client
         const initAuth0 = async () => {
-            // Check if the SDK is loaded
-            if (window.createAuth0Client) {
-                auth0 = await createAuth0Client({
-                    domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain
-                    client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
-                    redirect_uri: window.location.href  // The current URL for handling the callback
-                });
-                console.log("Auth0 client initialized.");
-            } else {
-                console.error("Auth0 SDK not loaded correctly.");
-            }
+            auth0 = await createAuth0Client({
+                domain: 'YOUR_AUTH0_DOMAIN',  // Replace with your Auth0 domain
+                client_id: 'YOUR_AUTH0_CLIENT_ID',  // Replace with your Auth0 client ID
+                redirect_uri: window.location.href  // The current URL for handling the callback
+            });
         };
 
-        // Handle the redirect callback from Auth0
         const handleRedirectCallback = async () => {
-            const result = await auth0.handleRedirectCallback();
-            window.history.replaceState({}, document.title, "/"); // Clean the URL after handling callback
+            await auth0.handleRedirectCallback();
             window.location.href = "/"; // Redirect to home page after successful login
         };
 
-        // Check for the 'code' in the URL, indicating a successful login redirect
-        if (window.location.search.includes('code=')) {
-            initAuth0().then(() => {
-                handleRedirectCallback(); // Handle the redirect callback when code is found
+        // Initialize Auth0 and handle callback
+        initAuth0()
+            .then(() => {
+                if (window.location.search.includes('code=')) {
+                    handleRedirectCallback();
+                }
+            })
+            .catch(error => {
+                console.error('Error during Auth0 initialization:', error);
             });
-        } else {
-            initAuth0(); // Initialize Auth0 client if no code is found
-        }
-
     </script>
 </body>
 </html>
