@@ -78,11 +78,10 @@ function displayUser(user) {
     }
 
     if (userInfo) {
-        userInfo.innerHTML = `
-            <p>Logged in as ${user.login}</p>
-            <img src="${user.avatar_url}" alt="Profile Picture" width="50">
-            <button onclick="logout()">Logout</button>
-        `;
+        document.getElementById('username').textContent = user.login;
+        document.getElementById('avatar').src = user.avatar_url;
+        document.getElementById('token-count').textContent = 0; // Initialize to 0
+        document.getElementById('gem-count').textContent = 0; // Initialize to 0
         userInfo.style.display = 'block'; // Show user info
     }
 }
@@ -116,6 +115,22 @@ function showLoadingIndicator() {
     }
 }
 
+// --- Daily Reward Logic ---
+function grantDailyReward() {
+    const today = new Date().toLocaleDateString(); // Get current date in EST
+    const lastClaimed = localStorage.getItem('lastClaimed');
+
+    if (lastClaimed !== today) {
+        let tokens = parseInt(document.getElementById('token-count').textContent);
+        let gems = parseInt(document.getElementById('gem-count').textContent);
+        tokens += 2;
+        gems += 5;
+        document.getElementById('token-count').textContent = tokens;
+        document.getElementById('gem-count').textContent = gems;
+        localStorage.setItem('lastClaimed', today);
+    }
+}
+
 // --- Main Execution Flow ---
 async function handleLogin() {
     const loginButton = document.getElementById('login-button');
@@ -134,6 +149,7 @@ async function handleLogin() {
             if (user) {
                 localStorage.setItem('githubUser', JSON.stringify(user));
                 displayUser(user);
+                grantDailyReward(); // Grant daily reward after login
             }
         }
     } else {
@@ -142,6 +158,7 @@ async function handleLogin() {
         if (storedUser) {
             const user = JSON.parse(storedUser);
             displayUser(user);
+            grantDailyReward(); // Grant daily reward on page load if logged in
         } else {
             // User is NOT logged in, *now* set up the login button.
             if (loginButton) {
@@ -153,5 +170,5 @@ async function handleLogin() {
 
 
 // --- Event Listener ---
-// Call handleLogin when the DOM is fully loaded.  Not needed if you use DOMContentLoaded
+// Call handleLogin when the DOM is fully loaded.  Not needed if you use DOMContentLoaded
 handleLogin();
