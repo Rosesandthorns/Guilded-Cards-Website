@@ -15,9 +15,37 @@
         }
         .loading #gems-count,
         .loading #tokens-count,
-        .loading #button-text {
+        .loading #button-text,
+        .loading #guild-display{
             display: none; /* Hide actual content during loading */
         }
+        /* Style for current guild button */
+        .current-guild {
+            background-color: #444; /* Darker gray */
+            color: #fff;
+            cursor: not-allowed; /* Indicate it's not clickable */
+        }
+
+        /* Style for locked guild button */
+        .locked-guild {
+            background-color: #888; /* Lighter gray */
+            color: #fff;
+            cursor: not-allowed;
+            position: relative; /* For positioning the lock icon */
+        }
+
+        .locked-guild::after {
+            content: '🔒'; /* Lock icon (you can use an image instead) */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1em; /* Adjust size as needed */
+        }
+        #guild-buttons{
+          margin-top: 20px;
+        }
+
     </style>
 </head>
 <body>
@@ -29,6 +57,7 @@
             <div id="gemTokenContainer" class="loading">
                <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
                 <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p>Guild: <span id="guild-display"></span><span class="loading-indicator">Loading...</span></p>
             </div>
              <button id="googleSignInButton" class="loading">
               <span id="button-text">Sign in with Google</span>
@@ -40,12 +69,19 @@
         <h1>Welcome to Guilded Cards!</h1>
         <p>Explore and collect unique cards.</p>
         <div id="content"></div>
+        <div id="guild-buttons">
+            <button id="golden-guild-button">Golden Guild</button>
+            <button id="mystic-guild-button">Mystic Guild</button>
+            <button id="justice-guild-button">Justice Guild</button>
+            <button id="elemental-guild-button">Elemental Guild</button>
+            <button id="invisible-guild-button">Invisible Guild</button>
+            </div>
     </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
     <script type="module">
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { displayUserStatsRealtime, stopListening } from "./CoinGemUserData.js";
+        import { displayUserStatsRealtime, stopListening, changeGuild, updateGuildButtonStates } from "./CoinGemUserData.js";
 
         const auth = getAuth();
         const googleProvider = new GoogleAuthProvider();
@@ -79,6 +115,33 @@
 
             const gemTokenContainer = document.getElementById("gemTokenContainer");
             const signInButton = document.getElementById("googleSignInButton");
+
+            // --- Guild Button Click Handlers ---
+              const guildButtons = {
+                "Golden Guild": document.getElementById("golden-guild-button"),
+                "Mystic Guild": document.getElementById("mystic-guild-button"),
+                "Justice Guild": document.getElementById("justice-guild-button"),
+                "Elemental Guild": document.getElementById("elemental-guild-button"),
+                "Invisible Guild": document.getElementById("invisible-guild-button"),
+                // Add other guilds here...
+            };
+            for (const guildName in guildButtons) {
+              const button = guildButtons[guildName];
+              button.addEventListener('click', async () =>
+              {
+                try{
+                  await changeGuild(auth.currentUser.uid, guildName);
+                  //No need to reload page anymore!
+                  // updateGuildButtonStates(auth.currentUser.uid);  // Update button states
+                  // displayUserStatsRealtime(auth.currentUser.uid, "gems-count", "tokens-count", "guild-display");
+
+                }
+                catch(error)
+                {
+                  alert(error.message);
+                }
+              });
+            }
             onAuthStateChanged(auth, (user) => {
 
                 if (user) {
@@ -86,7 +149,8 @@
                     if (unsubscribeStats) {
                         stopListening(unsubscribeStats);
                     }
-                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
+                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count", "guild-display");
+                  //  updateGuildButtonStates(userId);
 
                     // Change button to Sign Out
                     signInButton.querySelector("#button-text").textContent = "Sign Out";  // Update the inner span
@@ -99,6 +163,7 @@
                     }
                     document.getElementById("gems-count").textContent = ""; // Clear, not "Not Logged In"
                     document.getElementById("tokens-count").textContent = ""; // Clear
+                    document.getElementById("guild-display").textContent = "";
 
                     // Change button back to Sign In
                     signInButton.querySelector("#button-text").textContent = "Sign in with Google"; // Update inner span
