@@ -75,7 +75,7 @@
             <button id="justice-guild-button">Justice Guild</button>
             <button id="elemental-guild-button">Elemental Guild</button>
             <button id="invisible-guild-button">Invisible Guild</button>
-            </div>
+            <button id="glass-guild-button">Glass Guild</button> </div>
     </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
@@ -117,30 +117,24 @@
             const signInButton = document.getElementById("googleSignInButton");
 
             // --- Guild Button Click Handlers ---
-              const guildButtons = {
-                "Golden Guild": document.getElementById("golden-guild-button"),
-                "Mystic Guild": document.getElementById("mystic-guild-button"),
-                "Justice Guild": document.getElementById("justice-guild-button"),
-                "Elemental Guild": document.getElementById("elemental-guild-button"),
-                "Invisible Guild": document.getElementById("invisible-guild-button"),
-                // Add other guilds here...
-            };
-            for (const guildName in guildButtons) {
-              const button = guildButtons[guildName];
-              button.addEventListener('click', async () =>
-              {
-                try{
-                  await changeGuild(auth.currentUser.uid, guildName);
-                  //No need to reload page anymore!
-                  // updateGuildButtonStates(auth.currentUser.uid);  // Update button states
-                  // displayUserStatsRealtime(auth.currentUser.uid, "gems-count", "tokens-count", "guild-display");
+              // Get all guild buttons dynamically (based on guildData)
+            for (const guildName in guildData) {
+                const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
+                const button = document.getElementById(buttonId);
 
+                if (!button) {
+                    console.warn(`Button with ID "${buttonId}" not found!`);
+                    continue;
                 }
-                catch(error)
-                {
-                  alert(error.message);
-                }
-              });
+
+                button.addEventListener('click', async () => {
+                    try {
+                        await changeGuild(auth.currentUser.uid, guildName);
+                        // updateGuildButtonStates is now called automatically by the onSnapshot listener
+                    } catch (error) {
+                        alert(error.message); // Display the error message from changeGuild
+                    }
+                });
             }
             onAuthStateChanged(auth, (user) => {
 
