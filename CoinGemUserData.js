@@ -167,8 +167,7 @@ async function initializeUserData(userId) {
           Tokens: 5,
           guild: "No Guild",
           lastGuildChange: null,
-          gmail: "powwerofpowwer@gmail.com",  // Consider getting from auth
-          photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth
+          photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth object
         };
 
         try {
@@ -182,7 +181,7 @@ async function initializeUserData(userId) {
 }
 
 // --- setupGuildButtons function ---
- function setupGuildButtons(auth) {
+export function setupGuildButtons(auth) {
     for (const guildName in guildData) {
         const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
         const button = document.getElementById(buttonId);
@@ -202,5 +201,20 @@ async function initializeUserData(userId) {
     }
 }
 
-// Corrected Combined Export Statement
-export { changeGuild, updateGuildButtonStates, setupGuildButtons };
+//NEW FUNCTION
+// --- Get User Data ---
+export async function getUserData(userId) {
+    const userDocRef = doc(db, "users", userId);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (userDocSnap.exists()) {
+        return userDocSnap.data();
+    } else {
+        console.log("No such document!");
+        return null; // Or throw an error, or return default data
+    }
+}
+
+
+// Combined Export Statement
+export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening, getUserData };
