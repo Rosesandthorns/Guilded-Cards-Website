@@ -72,7 +72,7 @@
             <a href="/cards">Cards</a>
             <a href="/profile">Profile</a>
             <div id="gemTokenContainer" class="loading">
-               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
                 <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
                 <p>Guild: <span id="guild-display"></span><span class="loading-indicator">Loading...</span></p>
             </div>
@@ -123,9 +123,7 @@
         async function displayUserData(user) {
             const profileImage = document.getElementById('profileImage');
             const userEmail = document.getElementById('userEmail');
-            const gemTokenContainer = document.getElementById("gemTokenContainer");
-            const signInButton = document.getElementById("googleSignInButton");
-
+            //Removed unnecessary variables
 
             if (user) {
                 // Get user data from Firestore
@@ -179,4 +177,29 @@
             // Start listening and store unsubscribe for stats
             unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count", "guild-display");
 
-            // Display
+            // Display profile data, AWAIT the call.
+            await displayUserData(user);
+            signInButton.querySelector("#button-text").textContent = "Sign Out";
+            signInButton.onclick = signOutFromGoogle;
+          } else {
+           // If user is not signed in
+            if (unsubscribeStats) {
+              stopListening(unsubscribeStats);
+            }
+            document.getElementById("gems-count").textContent = "";
+            document.getElementById("tokens-count").textContent = "";
+            document.getElementById("guild-display").textContent = "";
+
+            signInButton.querySelector("#button-text").textContent = "Sign in with Google";
+            signInButton.onclick = signInWithGoogle;
+          }
+           gemTokenContainer.classList.remove('loading');
+           signInButton.classList.remove('loading');
+
+        });
+
+        signInButton.onclick = signInWithGoogle; // Initial setup for the sign-in button.
+      });
+    </script>
+</body>
+</html>
