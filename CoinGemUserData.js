@@ -215,5 +215,5 @@ export async function getUserData(userId) {
 }
 
 
-// Corrected Combined Export Statement
-export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening, getUserData };
+// Corrected Combined Export Statement (NOW TRULY CORRECT)
+export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening };
