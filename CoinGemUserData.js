@@ -1,14 +1,16 @@
 // CoinGemUserData.js
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
-  // YOUR FIREBASE CONFIGURATION HERE
-  // apiKey: "YOUR_API_KEY",
-  // authDomain: "your-project-id.firebaseapp.com",
-  // projectId: "your-project-id",
-  // ... other config values ...
+  apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // YOUR API KEY
+  authDomain: "guilded-cards.firebaseapp.com",
+  projectId: "guilded-cards",
+  storageBucket: "guilded-cards.firebasestorage.app",
+  messagingSenderId: "566491650991",
+  appId: "1:566491650991:web:324493f697af5dacfeed5a",
+  measurementId: "G-96KRM8BE76"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -27,9 +29,14 @@ export function displayUserStatsRealtime(userId, gemsElementId, tokensElementId)
             document.getElementById(gemsElementId).textContent = gems;
             document.getElementById(tokensElementId).textContent = tokens;
         } else {
-            console.log("No such document!");
-            document.getElementById(gemsElementId).textContent = 'N/A';
-            document.getElementById(tokensElementId).textContent = 'N/A';
+            console.log("No such document! Initializing...");
+             // Initialize user data if the document doesn't exist.
+            initializeUserData(userId)
+                .then(() => {
+                  //Try again to get document
+                  displayUserStatsRealtime(userId, gemsElementId, tokensElementId);
+                })
+                .catch(err => console.error("Error initializing user data", err));
         }
     }, (error) => {
         console.error("Error listening for document changes:", error);
@@ -44,4 +51,28 @@ export function stopListening(unsubscribeFunction) {
     if (unsubscribeFunction) {
         unsubscribeFunction();
     }
+}
+
+// Function to initialize user data in Firestore IF it doesn't exist.
+async function initializeUserData(userId) {
+    const userDocRef = doc(db, "users", userId);
+    const docSnap = await getDoc(userDocRef);
+    if (!docSnap.exists())
+    {
+      const initialData = {
+        Gems: 5,
+        Tokens: 5,
+        gmail: "powwerofpowwer@gmail.com", //  Consider getting this from the auth object!
+        photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth object!
+      };
+
+      try {
+          await setDoc(userDocRef, initialData);
+          console.log("User data initialized for:", userId);
+      } catch (error) {
+          console.error("Error initializing user data:", error);
+          throw error; // Re-throw the error so the caller can handle it.
+      }
+    }
+
 }
