@@ -5,48 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Home</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Styles for loading state */
-        .loading-indicator {
-            display: none; /* Hidden by default */
-        }
-        .loading .loading-indicator {
-            display: inline; /* Show when parent has 'loading' class */
-        }
-        .loading #gems-count,
-        .loading #tokens-count,
-        .loading #button-text,
-        .loading #guild-display{
-            display: none; /* Hide actual content during loading */
-        }
-        /* Style for current guild button */
-        .current-guild {
-            background-color: #444; /* Darker gray */
-            color: #fff;
-            cursor: not-allowed; /* Indicate it's not clickable */
-        }
-
-        /* Style for locked guild button */
-        .locked-guild {
-            background-color: #888; /* Lighter gray */
-            color: #fff;
-            cursor: not-allowed;
-            position: relative; /* For positioning the lock icon */
-        }
-
-        .locked-guild::after {
-            content: '🔒'; /* Lock icon (you can use an image instead) */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1em; /* Adjust size as needed */
-        }
-        #guild-buttons{
-          margin-top: 20px;
-        }
-
-    </style>
 </head>
 <body>
     <header>
@@ -55,8 +13,8 @@
             <a href="cards.html">Cards</a>
             <a href="profile.html">Profile</a>
             <div id="gemTokenContainer" class="loading">
-               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
-                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
+               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" class="currency-icon"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
                 <p>Guild: <span id="guild-display"></span><span class="loading-indicator">Loading...</span></p>
             </div>
              <button id="googleSignInButton" class="loading">
@@ -81,19 +39,16 @@
     <script type="module" src="CoinGemUserData.js"></script>
     <script type="module">
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { displayUserStatsRealtime, stopListening, changeGuild, updateGuildButtonStates, setupGuildButtons } from "./CoinGemUserData.js";
+        import { displayUserStatsRealtime, stopListening, setupGuildButtons } from "./CoinGemUserData.js";
 
         const auth = getAuth();
         const googleProvider = new GoogleAuthProvider();
-        let unsubscribe;
         let unsubscribeStats;
-
 
         // Function to handle Google Sign-In
         async function signInWithGoogle() {
             try {
-                const result = await signInWithPopup(auth, googleProvider);
-                console.log("User signed in:", result.user);
+                await signInWithPopup(auth, googleProvider);
             } catch (error) {
                 console.error("Error signing in with Google:", error);
             }
@@ -103,7 +58,6 @@
         async function signOutFromGoogle() {
             try {
                 await signOut(auth);
-                console.log("User signed out");
             } catch (error) {
                 console.error("Error signing out:", error);
             }
@@ -113,8 +67,7 @@
             const gemTokenContainer = document.getElementById("gemTokenContainer");
             const signInButton = document.getElementById("googleSignInButton");
 
-            // --- Call setupGuildButtons ---
-            setupGuildButtons(auth); // Pass auth to the setup function
+            setupGuildButtons(auth); // Call setupGuildButtons
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -126,9 +79,7 @@
 
                     signInButton.querySelector("#button-text").textContent = "Sign Out";
                     signInButton.onclick = signOutFromGoogle;
-
                 } else {
-                    console.log("User is not signed in.");
                     if (unsubscribeStats) {
                         stopListening(unsubscribeStats);
                     }
@@ -143,6 +94,7 @@
                 gemTokenContainer.classList.remove('loading');
                 signInButton.classList.remove('loading');
             });
+
             signInButton.onclick = signInWithGoogle;
         });
     </script>
