@@ -27,18 +27,7 @@
         <p>Explore and collect unique cards.</p>
         <div id="content"></div>
         <div id="card-packs-container">
-            <h2>Card Packs</h2>
-            <div class="card-pack" data-pack-id="placeholder-pack">
-                <img src="placeholder-pack-image.png" alt="Placeholder Card Pack" class="card-pack-image">
-                <div class="card-pack-info">
-                    <p class="card-pack-name">Placeholder Pack</p>
-                    <p class="card-pack-price">
-                        <img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> 1 Token
-                    </p>
-                    <button class="open-pack-button">Open Pack</button>
-                </div>
-            </div>
-            </div>
+           </div>
     </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
@@ -55,7 +44,6 @@
         let unsubscribeStats;
         // Get the functions instance (if using Firebase Functions)
         const functions = getFunctions();
-
 
         // Function to handle Google Sign-In
         async function signInWithGoogle() {
@@ -108,62 +96,47 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        const packsData = {
+        "starter-pack": {
+            name: "Starter Pack",
+            image: "starter-pack-image.png", // Replace with actual image path
+            price: 1, // 1 Token
+            cards: [1, 2, 3, 17, 33, 34, 35], // Card IDs in this pack
+        },
+        "basics-pack": {
+            name: "The Basics",
+            image: "basics-pack-image.png", // Replace
+            price: 3,
+            cards: [1, 2, 3, 4, 5, 6],
+        },
+        "guild-wars-pack": {
+            name: "Guild Wars",
+            image: "guild-wars-pack-image.png", // Replace
+            price: 5,
+            cards: [10, 11, 12, 13, 17, 18, 19, 20, 21, 22, 34, 35, 36, 37, 38, 41],
+        },
+        "here-be-dragons-pack": {
+            name: "Here be Dragons",
+            image: "here-be-dragons-pack-image.png", // Replace
+            price: 4,
+            cards: [23, 24, 25, 26, 27, 28, 29, 33],
+        },
 
-            const gemTokenContainer = document.getElementById("gemTokenContainer");
-            const signInButton = document.getElementById("googleSignInButton");
-            const cardPacksContainer = document.getElementById('card-packs-container');
+    };
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    const userId = user.uid;
-                    if (unsubscribeStats) {
-                        stopListening(unsubscribeStats);
-                    }
-                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
-
-                    signInButton.querySelector("#button-text").textContent = "Sign Out";
-                    signInButton.onclick = signOutFromGoogle;
-
-                } else {
-                    console.log("User is not signed in.");
-                    if (unsubscribeStats) {
-                        stopListening(unsubscribeStats);
-                    }
-                    document.getElementById("gems-count").textContent = "";
-                    document.getElementById("tokens-count").textContent = "";
-
-                    signInButton.querySelector("#button-text").textContent = "Sign in with Google";
-                    signInButton.onclick = signInWithGoogle;
-                }
-
-                gemTokenContainer.classList.remove('loading');
-                signInButton.classList.remove('loading');
-            });
-
-            signInButton.onclick = signInWithGoogle;
-
-            // Event delegation for open pack buttons:
-            cardPacksContainer.addEventListener('click', (event) => {
-                if (event.target.classList.contains('open-pack-button')) {
-                    const cardPackDiv = event.target.closest('.card-pack');
-                    const packId = cardPackDiv.dataset.packId;
-
-                    // Call the openCardPack function (replace alert with this)
-                    openCardPack(packId)
-                        .then(cards => {
-                            // Display the opened cards to the user (you'll need to implement this)
-                            console.log("Cards received:", cards);
-                            alert(`Opened pack ${packId} and received cards: ${JSON.stringify(cards)}`); // Show the cards (for now)
-
-                        })
-                        .catch(error => {
-                            // Error handling is already done inside openCardPack,
-                            // but you could add additional UI updates here if needed.
-                        });
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+    const cardsData = {
+        1: { name: "Shield Bug", rarity: "Starter", pack: "The Basics" },
+        2: { name: "Stone Golem", rarity: "Starter", pack: "The Basics" },
+        3: { name: "White Snow", rarity: "Starter", pack: "The Basics" },
+        4: { name: "Void Bug", rarity: "Uncommon", pack: "The Basics" },
+        5: { name: "Void Golem", rarity: "Uncommon", pack: "The Basics" },
+        6: { name: "Black Snow", rarity: "Uncommon", pack: "The Basics" },
+        10: { name: "Hesta the Merchant", rarity: "Rare", pack: "Guild Wars" },
+        11: { name: "Golden Guard", rarity: "Rare", pack: "Guild Wars" },
+        12: { name: "Golden Relic", rarity: "Elusive", pack: "Guild Wars" },
+        13: { name: "Golden Crown", rarity: "Elusive", pack: "Guild Wars" },
+        17: { name: "Mana Deposit", rarity: "Starter", pack: "Guild Wars" },
+        18: { name: "Mad Mana", rarity: "Uncommon", pack: "Guild Wars" },
+        19: { name: "Elder Gorsh", rarity: "Rare", pack: "Guild Wars" },
+        20: { name: "Moro the Sniper", rarity: "Rare", pack: "Guild Wars" },
+        21: { name: "Doomsday Device", rarity: "Elusive", pack: "Guild Wars" },
