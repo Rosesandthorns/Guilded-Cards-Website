@@ -3,31 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guilded Cards</title>
-    <link rel="stylesheet" href="style.css">
+    <title>GitHub OAuth Example</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        nav {
+            background-color: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            justify-content: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        nav a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        nav a.active {
+            color: #007bff;
+        }
+
+        #content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        #loginButton, #logoutButton{
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        #loginButton:hover, #logoutButton:hover{
+            background-color: #0056b3;
+        }
+
+    </style>
 </head>
 <body>
-    <header>
-        <h2>Guilded Cards Homepage</h2>
-        <div id="login-container">
-            <a id="login-button" href="#">Login with GitHub</a>
-            <div id="loader" style="display: none;">Loading...</div>
+    <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="profile.html">Profile</a>
+        <a href="repos.html">Repositories</a>
+    </nav>
+    <div id="content">
+        <button id="loginButton">Login with GitHub</button>
+        <button id="logoutButton" style="display: none;">Logout</button>
+        <div id="userInfo"></div>
+        <div id="mainContent">
+            <h1>Welcome!</h1>
+            <p>Please log in with your GitHub account.</p>
         </div>
-    </header>
-
-    <div id="user-info" style="display: none;">
-        <p>Logged in as <span id="username"></span></p>
-        <img id="avatar" src="" alt="User's Profile Picture" width="50">
-        <p>Tokens: <span id="token-count">0</span></p>
-        <p>Gems: <span id="gem-count">0</span></p>
-        <button onclick="logout()">Logout</button>
     </div>
 
-    <main>
-        <div id="error-message" style="display: none; color: red;"></div>
-        <p>Welcome to my Guilded Cards, Sign in to get started!</p> 
-    </main>
+    <script>
+        const CLIENT_ID = 'YOUR_GITHUB_CLIENT_ID';
+        const REDIRECT_URI = window.location.origin;
+        let accessToken = localStorage.getItem('github_access_token');
 
-    <script src="script.js"></script>
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const userInfoDiv = document.getElementById('userInfo');
+
+        loginButton.addEventListener('click', () => {
+            const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=user:read repo`;
+            window.location.href = authUrl;
+        });
+
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('github_access_token');
+            accessToken = null;
+            updateUI();
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (code && !accessToken) {
+            async function fetchAccessToken(code) {
+                const response = await fetch(`https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        client_id: CLIENT_ID,
+                        client_secret: 'YOUR_GITHUB_CLIENT_SECRET',
+                        code: code,
+                        redirect_uri: REDIRECT_URI,
+                    }),
+                });
+
+                const data = await response.json();
+                if (data.access_token) {
+                    localStorage.setItem('github_access_token', data.access_token);
+                    accessToken = data.access_token;
+                    window.history.replaceState({}, document.title, "/");
+                    updateUI();
+                } else {
+                    console.error("Failed to get access token:", data);
+                }
+            }
+            fetchAccessToken(code);
+
+        } else {
+            updateUI();
+        }
+
+        async function fetchUserInfo(token) {
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.json();
+        }
+
+        async function updateUI() {
+            if (accessToken) {
+                loginButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+
+                try {
+                    const userInfo = await fetchUserInfo(accessToken);
+                    userInfoDiv.innerHTML = `<p>Logged in as ${userInfo.login} (${userInfo.name || 'No name provided'})</p><img src='${userInfo.avatar_url}' width='50px'/>`;
+                } catch (error) {
+                    console.error('Error fetching user info:', error);
+                    userInfoDiv.innerHTML = '<p>Error fetching user info.</p>';
+                }
+            } else {
+                loginButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                userInfoDiv.innerHTML = '';
+            }
+        }
+    </script>
 </body>
 </html>
