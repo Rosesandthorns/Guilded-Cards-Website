@@ -1,12 +1,11 @@
-// Import Firebase modules from the CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js"; // Added onAuthStateChanged
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js"; // Added doc, setDoc, getDoc
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js";
 
-// FOR TESTING ONLY - REMOVE THIS AND USE NETLIFY ENVIRONMENT VARIABLES
+// FOR TESTING ONLY - REMOVE AND USE NETLIFY ENVIRONMENT VARIABLES
 const firebaseApiKey = "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE";
 
-// ... (rest of your firebaseConfig and initialization - same as before) ...
+// ... (rest of your firebaseConfig - same as before) ...
 // If you're still using the environment variable approach *after* testing, uncomment this
 // and make sure the variable is set in Netlify.
 // const firebaseApiKey = import.meta.env.VITE_Firebase_Key;
@@ -25,7 +24,6 @@ const firebaseConfig = {
     appId: "1:566491650991:web:324493f697af5dacfeed5a",
     measurementId: "G-96KRMBBE76"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -35,9 +33,16 @@ const provider = new GoogleAuthProvider();
 const signInButton = document.getElementById("googleSignInButton");
 const contentDiv = document.getElementById("content");
 
+// Set Persistence (Optional - only if you want different than default)
+setPersistence(auth, browserSessionPersistence) // Use browserSessionPersistence
+    .then(() => {
+        // Persistence set successfully.  Now set up auth change listener.
+    })
+    .catch((error) => {
+        console.error("Error setting persistence:", error);
+    });
 
-
-// Function to fetch user data from Firestore (same as before)
+// Function to fetch user data from Firestore (keep this, but we'll also add a function to *write* data)
 async function fetchUserData() {
     try {
         const collectionRef = collection(db, 'users');
@@ -65,13 +70,39 @@ async function fetchUserData() {
     }
 }
 
+// Function to write user data to Firestore
+async function writeUserData(user) {
+    try {
+        const userRef = doc(db, 'users', user.uid); // Use user.uid as the document ID
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+            console.log("Document already exists. Not overwriting.");
+            return; // Don't overwrite if the document exists
+        }
+
+        // Data to write (match the structure in your image)
+        const userData = {
+            uid: user.uid,
+            gmail: user.email,
+            photourl: user.photoURL,
+            username: user.displayName,
+        };
+
+        await setDoc(userRef, userData);
+        console.log("✅ User data written to Firestore:", userData);
+
+    } catch (error) {
+        console.error("❌ Error writing user data to Firestore:", error);
+    }
+}
 
 
 // Google Sign-In Function
 async function signInWithGoogle() {
     try {
         const result = await signInWithPopup(auth, provider);
-        // User is signed in, no need to do anything here except handle UI
+        // User is signed in, data will be written in onAuthStateChanged
     } catch (error) {
         console.error("❌ Google Sign-In error:", error);
     }
@@ -81,7 +112,6 @@ async function signInWithGoogle() {
 async function signOutUser() {
     try {
         await signOut(auth);
-        // User is signed out, no need to do anything here except handle UI
     } catch (error) {
         console.error("❌ Sign-out error:", error);
     }
@@ -92,12 +122,12 @@ function updateUI(user) {
     if (user) {
         // User is signed in
         signInButton.textContent = "Sign Out";
-        signInButton.onclick = signOutUser; // Change the click handler
+        signInButton.onclick = signOutUser;
         contentDiv.innerHTML = `<p>Welcome, ${user.displayName}!</p>`;
     } else {
         // User is signed out
         signInButton.textContent = "Sign in with Google";
-        signInButton.onclick = signInWithGoogle; // Change the click handler
+        signInButton.onclick = signInWithGoogle;
         contentDiv.innerHTML = "<p>You are signed out.</p>";
     }
 }
@@ -105,12 +135,10 @@ function updateUI(user) {
 // Listen for authentication state changes
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
-     if (user) {
-        fetchUserData(); // Fetch user data when signed in.
+    if (user) {
+        writeUserData(user); // Write user data to Firestore
+        fetchUserData();    // Fetch user data (optional, for display)
     }
 });
 
-// Initial UI update (in case the user is already signed in on page load)
-//  The onAuthStateChanged handles this now, so we don't *need* this line,
-//  but it doesn't hurt to have it.  It ensures the UI is correct *immediately*.
-updateUI(auth.currentUser);
+// Initial UI update (handled by onAuthStateChanged now)
