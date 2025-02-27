@@ -1,15 +1,39 @@
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs } = require("firebase/firestore");
+// firebase.js (Netlify Function)
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 exports.handler = async function (event, context) {
     try {
-        // ... (Firebase config and initialization - same as before)
+        // Retrieve Firebase API Key from Netlify environment variables (process.env)
+        const firebaseApiKey = process.env.VITE_Firebase_Key;
+
+        if (!firebaseApiKey) {
+            console.error("❌ Firebase API Key is missing from Netlify environment variables (VITE_Firebase_Key)!");
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ error: "Firebase API Key not configured" }),
+            };
+        }
+
+        // Firebase configuration object
+        const firebaseConfig = {
+            apiKey: firebaseApiKey,
+            authDomain: "guilded-cards.firebaseapp.com",
+            projectId: "guilded-cards",
+            storageBucket: "guilded-cards.firebasestorage.app",
+            messagingSenderId: "566491650991",
+            appId: "1:566491650991:web:324493f697af5dacfeed5a",
+            measurementId: "G-96KRMBBE76"
+        };
+
+        // Initialize Firebase WITHIN the function
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         // --- Your Firebase logic here ---
-        // Example: Fetching data from Firestore with error handling and data validation
-        const collectionRef = collection(db, 'your-collection-name');
+        const collectionRef = collection(db, 'users'); // Use 'users', like your client-side code
 
-        // Validate collection name
+        // Validate collection name (Good practice, keep this)
         if (!collectionRef.path) {
             throw new Error('Invalid collection name');
         }
@@ -19,7 +43,7 @@ exports.handler = async function (event, context) {
         // Check if any documents exist
         if (snapshot.empty) {
             return {
-                statusCode: 200,
+                statusCode: 200, // Or 404 if you prefer
                 body: JSON.stringify({ message: 'No documents found' }),
             };
         }
@@ -28,7 +52,7 @@ exports.handler = async function (event, context) {
             const docData = doc.data();
 
             // Basic data validation (example)
-            if (!docData.id || !docData.name) {
+            if (!docData.gmail || !docData.uid) { // Match your client-side validation
                 console.warn(`Document ${doc.id} missing required fields`);
                 return null; // Or handle the error differently
             }
