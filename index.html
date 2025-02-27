@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Home</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -13,27 +14,42 @@
             <a href="cards.html">Cards</a>
             <a href="profile.html">Profile</a>
             <div id="gemTokenContainer" class="loading">
-               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" class="currency-icon"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" class="currency-icon"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
                 <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
                 <p>Guild: <span id="guild-display"></span><span class="loading-indicator">Loading...</span></p>
             </div>
-             <button id="googleSignInButton" class="loading">
-              <span id="button-text">Sign in with Google</span>
-              <span id="button-loading" class="loading-indicator">Loading...</span>
+            <button id="googleSignInButton" class="loading">
+                <span id="button-text">Sign in with Google</span>
+                <span id="button-loading" class="loading-indicator">Loading...</span>
             </button>
         </nav>
     </header>
     <main>
         <h1>Welcome to Guilded Cards!</h1>
         <p>Explore and collect unique cards.</p>
+
+        <div class="background-container">
+            <img src="Guildedicons/Forge.png" alt="The Six Forges" class="forge-background">
+            <div class="dark-overlay"></div>
+            <div class="guild-selection-area">
+                <div class="scroll-text-container">
+                    <p class="scroll-text">
+                        The 6 Forges Lay in the Sky<br>
+                        One for every guild<br>
+                        One for every cry
+                    </p>
+                </div>
+                 <div id="guild-buttons">
+                    <button id="golden-guild-button">Golden Guild</button>
+                    <button id="mystic-guild-button">Mystic Guild</button>
+                    <button id="justice-guild-button">Justice Guild</button>
+                    <button id="elemental-guild-button">Elemental Guild</button>
+                    <button id="invisible-guild-button">Invisible Guild</button>
+                    <button id="glass-guild-button">Glass Guild</button>
+                </div>
+            </div>
+        </div>
         <div id="content"></div>
-        <div id="guild-buttons">
-            <button id="golden-guild-button">Golden Guild</button>
-            <button id="mystic-guild-button">Mystic Guild</button>
-            <button id="justice-guild-button">Justice Guild</button>
-            <button id="elemental-guild-button">Elemental Guild</button>
-            <button id="invisible-guild-button">Invisible Guild</button>
-            <button id="glass-guild-button">Glass Guild</button> </div>
     </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
