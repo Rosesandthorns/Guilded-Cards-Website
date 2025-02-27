@@ -1,7 +1,8 @@
 // CoinGemUserData.js
 
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
+// Import from CDN
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getFirestore, doc, onSnapshot, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // YOUR API KEY
