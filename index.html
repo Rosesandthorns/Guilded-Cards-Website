@@ -1,11 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Home</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <p>Gems: <span id="gems-count">Loading...</span></p>
-    <p>Tokens: <span id="tokens-count">Loading...</span></p>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="cards.html">Cards</a>
+            <a href="profile.html">Profile</a>
+            <div id="gemTokenContainer">
+                <p>Gems: <span id="gems-count">Loading...</span></p>
+                <p>Tokens: <span id="tokens-count">Loading...</span></p>
+            </div>
+            <button id="googleSignInButton">Sign in with Google</button>
+        </nav>
+    </header>
+    <main>
+        <h1>Welcome to Guilded Cards!</h1>
+        <p>Explore and collect unique cards.</p>
+        <div id="content"></div>
+    </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
     <script type="module">
@@ -18,18 +36,17 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const userId = user.uid;
-                // Stop any previous listener before starting a new one
+                // Stop any previous listener
                 if (unsubscribe) {
                     stopListening(unsubscribe);
                 }
-                // Start listening and store the unsubscribe function
+                // Start listening and store unsubscribe
                 unsubscribe = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
             } else {
                 // User is signed out.
                 console.log("User is not signed in.");
-                // Stop listening if the user signs out
                 if (unsubscribe) {
-                  stopListening(unsubscribe);
+                    stopListening(unsubscribe);
                 }
                 document.getElementById("gems-count").textContent = "Not Logged In";
                 document.getElementById("tokens-count").textContent = "Not Logged In";
