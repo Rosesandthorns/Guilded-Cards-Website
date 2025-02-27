@@ -5,21 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Cards</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Styles for loading state */
-        .loading-indicator {
-            display: none; /* Hidden by default */
-        }
-        .loading .loading-indicator {
-            display: inline; /* Show when parent has 'loading' class */
-        }
-        .loading #gems-count,
-        .loading #tokens-count,
-        .loading #button-text {
-            display: none; /* Hide actual content during loading */
-        }
-    </style>
-</head>
+    </head>
 <body>
     <header>
         <nav>
@@ -27,12 +13,12 @@
             <a href="cards.html">Cards</a>
             <a href="profile.html">Profile</a>
             <div id="gemTokenContainer" class="loading">
-               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
-                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" class="currency-icon"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
             </div>
-             <button id="googleSignInButton" class="loading">
-              <span id="button-text">Sign in with Google</span>
-              <span id="button-loading" class="loading-indicator">Loading...</span>
+            <button id="googleSignInButton" class="loading">
+                <span id="button-text">Sign in with Google</span>
+                <span id="button-loading" class="loading-indicator">Loading...</span>
             </button>
         </nav>
     </header>
@@ -40,17 +26,35 @@
         <h1>Welcome to Guilded Cards!</h1>
         <p>Explore and collect unique cards.</p>
         <div id="content"></div>
+        <div id="card-packs-container">
+            <h2>Card Packs</h2>
+            <div class="card-pack" data-pack-id="placeholder-pack">
+                <img src="placeholder-pack-image.png" alt="Placeholder Card Pack" class="card-pack-image">
+                <div class="card-pack-info">
+                    <p class="card-pack-name">Placeholder Pack</p>
+                    <p class="card-pack-price">
+                        <img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> 1 Token
+                    </p>
+                    <button class="open-pack-button">Open Pack</button>
+                </div>
+            </div>
+            </div>
     </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
     <script type="module">
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { displayUserStatsRealtime, stopListening } from "./CoinGemUserData.js";
+        // Add import for Firebase Functions if you're using them (recommended):
+        import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js';
+
 
         const auth = getAuth();
         const googleProvider = new GoogleAuthProvider();
         let unsubscribe;
         let unsubscribeStats;
+        // Get the functions instance (if using Firebase Functions)
+        const functions = getFunctions();
 
 
         // Function to handle Google Sign-In
@@ -75,12 +79,42 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => { // Wait for DOM to be ready
+        // Example function (you'll need to implement this using your Firebase setup):
+
+        async function openCardPack(packId) {
+        // 1. Check if the user has enough tokens.
+        // 2. Deduct a token from the user's balance.
+        // 3. Call your Firebase function to get the cards for the pack.
+        // 4. Return the cards.
+        // 5. Handle errors (e.g., not enough tokens, pack not found).
+        //    Make sure your Firebase function handles security (only authenticated users
+        //    can open packs, etc.)
+
+            const user = auth.currentUser;
+            if (!user) {
+            throw new Error("User not signed in."); // Or handle the unsigned-in state
+            }
+
+            const openPackFunction = httpsCallable(functions, 'openPack'); // Replace 'openPack'
+            try{
+                const result = await openPackFunction({ packId: packId, userId: user.uid });
+                 return result.data; // Assuming your Cloud Function returns the cards in the 'data' field
+            }
+            catch(error){
+                console.error("Error opening pack:", error);
+                alert("Failed to open the pack. Please try again later."); // User-friendly error
+                throw error; // Re-throw to handle it further up if needed
+
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
 
             const gemTokenContainer = document.getElementById("gemTokenContainer");
             const signInButton = document.getElementById("googleSignInButton");
-            onAuthStateChanged(auth, (user) => {
+            const cardPacksContainer = document.getElementById('card-packs-container');
 
+            onAuthStateChanged(auth, (user) => {
                 if (user) {
                     const userId = user.uid;
                     if (unsubscribeStats) {
@@ -88,8 +122,7 @@
                     }
                     unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
 
-                    // Change button to Sign Out
-                    signInButton.querySelector("#button-text").textContent = "Sign Out";  // Update the inner span
+                    signInButton.querySelector("#button-text").textContent = "Sign Out";
                     signInButton.onclick = signOutFromGoogle;
 
                 } else {
@@ -97,25 +130,40 @@
                     if (unsubscribeStats) {
                         stopListening(unsubscribeStats);
                     }
-                    document.getElementById("gems-count").textContent = ""; // Clear, not "Not Logged In"
-                    document.getElementById("tokens-count").textContent = ""; // Clear
+                    document.getElementById("gems-count").textContent = "";
+                    document.getElementById("tokens-count").textContent = "";
 
-                    // Change button back to Sign In
-                    signInButton.querySelector("#button-text").textContent = "Sign in with Google"; // Update inner span
+                    signInButton.querySelector("#button-text").textContent = "Sign in with Google";
                     signInButton.onclick = signInWithGoogle;
                 }
 
-              // Remove loading class *after* auth state is known
                 gemTokenContainer.classList.remove('loading');
                 signInButton.classList.remove('loading');
             });
 
-            // Initial setup: Add click listener to the sign-in button, but only *after* DOMContentLoaded
-              signInButton.onclick = signInWithGoogle; // Now safe to access the button
+            signInButton.onclick = signInWithGoogle;
 
-        }); // DOMContentLoaded end
+            // Event delegation for open pack buttons:
+            cardPacksContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('open-pack-button')) {
+                    const cardPackDiv = event.target.closest('.card-pack');
+                    const packId = cardPackDiv.dataset.packId;
 
+                    // Call the openCardPack function (replace alert with this)
+                    openCardPack(packId)
+                        .then(cards => {
+                            // Display the opened cards to the user (you'll need to implement this)
+                            console.log("Cards received:", cards);
+                            alert(`Opened pack ${packId} and received cards: ${JSON.stringify(cards)}`); // Show the cards (for now)
 
+                        })
+                        .catch(error => {
+                            // Error handling is already done inside openCardPack,
+                            // but you could add additional UI updates here if needed.
+                        });
+                }
+            });
+        });
     </script>
 </body>
 </html>
