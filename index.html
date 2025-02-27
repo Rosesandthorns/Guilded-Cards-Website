@@ -13,8 +13,8 @@
             <a href="cards.html">Cards</a>
             <a href="profile.html">Profile</a>
             <div id="gemTokenContainer">
-                <p>Gems: <span id="gems-count">Loading...</span></p>
-                <p>Tokens: <span id="tokens-count">Loading...</span></p>
+               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count">Loading...</span></p>
             </div>
             <button id="googleSignInButton">Sign in with Google</button>
         </nav>
@@ -27,32 +27,67 @@
 
     <script type="module" src="CoinGemUserData.js"></script>
     <script type="module">
-        // Import from CDN
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { displayUserStatsRealtime, stopListening } from "./CoinGemUserData.js";
 
-        const auth = getAuth(); // Initialize auth OUTSIDE onAuthStateChanged
-        let unsubscribe; // Store the unsubscribe function
+        const auth = getAuth();
+        const googleProvider = new GoogleAuthProvider();
+        let unsubscribe;
+
+        // Function to handle Google Sign-In
+        async function signInWithGoogle() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                // The user is signed in.
+                // You can get user information from result.user if needed.
+                console.log("User signed in:", result.user);
+            } catch (error) {
+                console.error("Error signing in with Google:", error);
+            }
+        }
+
+        // Function to handle Sign-Out
+        async function signOutFromGoogle() {
+            try {
+                await signOut(auth);
+                console.log("User signed out");
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        }
+
 
         onAuthStateChanged(auth, (user) => {
+            const signInButton = document.getElementById("googleSignInButton"); //Get the button
+
             if (user) {
                 const userId = user.uid;
-                // Stop any previous listener
                 if (unsubscribe) {
                     stopListening(unsubscribe);
                 }
-                // Start listening and store unsubscribe
                 unsubscribe = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
+
+                // Change button to Sign Out
+                signInButton.textContent = "Sign Out";
+                signInButton.onclick = signOutFromGoogle; // Attach sign-out function
+
             } else {
-                // User is signed out.
                 console.log("User is not signed in.");
                 if (unsubscribe) {
-                  stopListening(unsubscribe);
+                    stopListening(unsubscribe);
                 }
                 document.getElementById("gems-count").textContent = "Not Logged In";
                 document.getElementById("tokens-count").textContent = "Not Logged In";
+
+                // Change button back to Sign In
+                signInButton.textContent = "Sign in with Google";
+                signInButton.onclick = signInWithGoogle; // Attach sign-in function
             }
         });
+
+        // Initial setup: Add click listener to the sign-in button
+        document.getElementById("googleSignInButton").onclick = signInWithGoogle;
+
     </script>
 </body>
 </html>
