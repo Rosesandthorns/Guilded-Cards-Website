@@ -23,7 +23,7 @@ const guildData = {
     "Justice Guild": { cost: 10 },
     "Elemental Guild": { cost: 10 },
     "Invisible Guild": { cost: 10 },
-    "Glass Guild": {cost: 10}, // Added Glass Guild
+    "Glass Guild": {cost: 10},
 };
 
 // --- Change Guild ---
@@ -167,8 +167,8 @@ async function initializeUserData(userId) {
           Tokens: 5,
           guild: "No Guild",
           lastGuildChange: null,
-          gmail: "powwerofpowwer@gmail.com", // Consider getting this from auth object!
-          photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth object
+          gmail: "powwerofpowwer@gmail.com",  // Consider getting from auth
+          photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth
         };
 
         try {
@@ -182,7 +182,7 @@ async function initializeUserData(userId) {
 }
 
 // --- setupGuildButtons function ---
-export function setupGuildButtons(auth) {  // Take auth as an argument
+export function setupGuildButtons(auth) {
     for (const guildName in guildData) {
         const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
         const button = document.getElementById(buttonId);
@@ -202,5 +202,5 @@ export function setupGuildButtons(auth) {  // Take auth as an argument
     }
 }
 
-// Combined Export Statement (Best Practice)
+// Combined Export Statement
 export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening };
