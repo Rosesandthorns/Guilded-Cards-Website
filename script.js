@@ -1,9 +1,7 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, getDocs } = require("firebase/firestore");
 
-// Your web app's Firebase configuration
+// Import the existing firebase configuration
 const firebaseConfig = {
   apiKey: process.env.Firebase_Key,
   authDomain: "guilded-cards.firebaseapp.com",
@@ -16,39 +14,50 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Sign-in with Google button
-const googleSignInButton = document.getElementById('googleSignInButton');
+exports.handler = async function (event, context) {
+  try {
+    // --- Your Firebase logic here ---
+    const collectionRef = collection(db, 'users'); // Use the correct collection name ('users')
 
-googleSignInButton.addEventListener('click', () => {
-  if (googleSignInButton.textContent === 'Sign in with Google') {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        const user = result.user;
-        console.log("User signed in with Google:", user);
-        googleSignInButton.textContent = 'Sign Out';
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        const email = error.customData.email;
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        console.error("Error signing in with Google:", error);
-      });
-  } else {
-    signOut(auth)
-      .then(() => {
-        console.log("User signed out");
-        googleSignInButton.textContent = 'Sign in with Google';
-      })
-      .catch((error) => {
-        console.error("Error signing out:", error);
-      });
+    // Validate collection name (optional, you can remove this if you're sure the collection exists)
+    if (!collectionRef.path) {
+      throw new Error('Invalid collection name');
+    }
+
+    const snapshot = await getDocs(collectionRef);
+
+    // Check if any documents exist
+    if (snapshot.empty) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'No documents found' }),
+      };
+    }
+
+    const data = snapshot.docs.map(doc => {
+      const docData = doc.data();
+
+      // You might want to adjust the validation based on your actual fields
+      // For example, checking for 'gmail' and 'uid' instead of 'id' and 'name'
+      if (!docData.gmail || !docData.uid) {
+        console.warn(`Document ${doc.id} missing required fields`);
+        return null; // Or handle the error differently
+      }
+
+      return docData;
+    }).filter(Boolean); // Remove null values
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(data),
+    };
+  } catch (error) {
+    console.error("Firebase error:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
   }
-});
+};
