@@ -1,24 +1,28 @@
+/* style.css */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Arial', sans-serif; /* Keep your original font */
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #f4f4f4; /* Keep your original background */
+    color: #333; /* Keep your original text color */
 }
 
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 0;
+    background-color: #333; /* Keep your original header background */
+    color: #fff; /* Keep your original header text color */
+    padding: 10px; /* Use a single padding value for simplicity */
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Space between nav and currency/button */
+    align-items: center; /* Vertically center items */
 }
 
 nav {
-    display: flex;
-    justify-content: center;
+    display: flex; /* Keep your original flexbox for the nav itself*/
+    justify-content: center; /* Center the navigation links */
 }
 
-nav a, nav button {
-    color: #fff;
+nav a, nav button { /* Style links AND buttons */
+    color: #fff; /* Keep your original link/button color */
     text-decoration: none;
     padding: 10px 20px;
     margin: 0 10px;
@@ -26,8 +30,7 @@ nav a, nav button {
     background: none;
     cursor: pointer;
 }
-
-nav a:hover, nav button:hover {
+nav a:hover, nav button:hover{
     background-color: #555;
 }
 
@@ -39,4 +42,28 @@ main {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Add more styling for cards, profile, etc. */
+#profileContent {
+    padding: 20px;
+}
+
+#profileContent h1 {
+    margin-bottom: 10px;
+}
+
+/* Style the gem and token container */
+#gemTokenContainer {
+    display: flex;
+    align-items: center;
+    margin-right: 10px; /* Add some spacing from the button */
+}
+
+.currency-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px;
+    margin-right: 5px; /* Space between icon and number */
+    vertical-align: middle; /* Ensure proper vertical alignment */
+}
+
+#gemCount, #tokenCount {
+    margin-right: 15px;
+}
