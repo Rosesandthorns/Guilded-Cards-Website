@@ -4,13 +4,13 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE",
-    authDomain: "guilded-cards.firebaseapp.com",
-    projectId: "guilded-cards",
-    storageBucket: "guilded-cards.firebasestorage.app",
-    messagingSenderId: "566491650991",
-    appId: "1:566491650991:web:324493f697af5dacfeed5a",
-    measurementId: "G-96KRM8BE76"
+  apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // YOUR API KEY
+  authDomain: "guilded-cards.firebaseapp.com",
+  projectId: "guilded-cards",
+  storageBucket: "guilded-cards.firebasestorage.app",
+  messagingSenderId: "566491650991",
+  appId: "1:566491650991:web:324493f697af5dacfeed5a",
+  measurementId: "G-96KRM8BE76"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -23,7 +23,7 @@ const guildData = {
     "Justice Guild": { cost: 10 },
     "Elemental Guild": { cost: 10 },
     "Invisible Guild": { cost: 10 },
-    "Glass Guild": { cost: 10 },
+    "Glass Guild": {cost: 10}, // Added Glass Guild
 };
 
 // --- Change Guild ---
@@ -181,7 +181,7 @@ async function initializeUserData(userId) {
     }
 }
 
-// --- Add setupGuildButtons function ---
+// --- setupGuildButtons function ---
 export function setupGuildButtons(auth) {  // Take auth as an argument
     for (const guildName in guildData) {
         const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
@@ -201,5 +201,6 @@ export function setupGuildButtons(auth) {  // Take auth as an argument
         });
     }
 }
-// Export
-export { changeGuild , updateGuildButtonStates, setupGuildButtons};
+
+// Combined Export Statement (Best Practice)
+export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening };
