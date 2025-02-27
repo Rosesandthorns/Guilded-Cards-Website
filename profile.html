@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Profile</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Basic styling for the profile (customize as needed) */
+        #profileContent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #profileImage {
+            width: 100px; /* Adjust as needed */
+            height: 100px; /* Adjust as needed */
+            border-radius: 50%; /* Makes the image circular */
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -12,14 +28,116 @@
             <a href="index.html">Home</a>
             <a href="cards.html">Cards</a>
             <a href="profile.html">Profile</a>
-            <div id="gemTokenContainer"></div>  <button id="googleSignInButton">Sign in with Google</button>
+            <div id="gemTokenContainer">
+                <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count">Loading...</span></p>
+            </div>
+            <button id="googleSignInButton">Sign in with Google</button>
         </nav>
     </header>
     <main>
         <div id="profileContent">
+            <img id="profileImage" src="" alt="Profile Picture">
+            <p id="userEmail">Loading...</p>
         </div>
     </main>
 
-    <script type="module" src="script.js"></script>
-    </body>
+    <script type="module" src="CoinGemUserData.js"></script>  <script type="module">
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { displayUserStatsRealtime, stopListening } from "./CoinGemUserData.js";
+
+        const auth = getAuth();
+        const googleProvider = new GoogleAuthProvider();
+        let unsubscribe;
+        let unsubscribeStats; //Separate listener for stats
+
+        // Function to handle Google Sign-In
+        async function signInWithGoogle() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                console.log("User signed in:", result.user);
+            } catch (error) {
+                console.error("Error signing in with Google:", error);
+            }
+        }
+
+        // Function to handle Sign-Out
+        async function signOutFromGoogle() {
+            try {
+                await signOut(auth);
+                console.log("User signed out");
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        }
+      // Display User Data Function
+        function displayUserData(user) {
+            if (user) {
+                // Display profile image
+                const profileImage = document.getElementById('profileImage');
+                if (user.photoURL) {
+                  profileImage.src = user.photoURL;
+                  profileImage.style.display = 'block'; //Show image
+                }
+                else
+                {
+                  profileImage.style.display = 'none';//Hide if no URL
+                }
+
+
+                // Display user email
+                const userEmail = document.getElementById('userEmail');
+                userEmail.textContent = user.email || 'No email available';
+            } else {
+                // Handle the case where there's no user data (e.g., user not signed in)
+                document.getElementById('profileImage').src = ""; // Clear image
+                document.getElementById('profileImage').style.display = 'none'
+                document.getElementById('userEmail').textContent = "Not signed in";
+
+            }
+        }
+
+
+
+        onAuthStateChanged(auth, (user) => {
+            const signInButton = document.getElementById("googleSignInButton");
+
+            if (user) {
+                const userId = user.uid;
+
+              // Stop previous listener for stats
+              if (unsubscribeStats) {
+                    stopListening(unsubscribeStats);
+                }
+                // Start listening and store unsubscribe for stats
+                unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
+
+                // Display User Data (photo, email)
+                displayUserData(user);
+
+
+                // Change button to Sign Out
+                signInButton.textContent = "Sign Out";
+                signInButton.onclick = signOutFromGoogle;
+
+            } else {
+                console.log("User is not signed in.");
+                if (unsubscribeStats) {
+                    stopListening(unsubscribeStats); // Stop stats listener
+                }
+                document.getElementById("gems-count").textContent = "Not Logged In";
+                document.getElementById("tokens-count").textContent = "Not Logged In";
+              //Clear user data display
+              displayUserData(null);
+
+                // Change button back to Sign In
+                signInButton.textContent = "Sign in with Google";
+                signInButton.onclick = signInWithGoogle;
+            }
+        });
+
+        // Initial setup: Add click listener to the sign-in button
+        document.getElementById("googleSignInButton").onclick = signInWithGoogle;
+    </script>
+</body>
 </html>
