@@ -265,3 +265,19 @@ main {
      margin-left: 15px; /* Add some spacing from the button */
 
 }
+
+/* ... (your existing styles) ... */
+.card-pack-available{
+    margin-bottom: 4px;
+}
+.card-pack-info ul {
+    list-style: none; /* Remove bullet points */
+    padding: 0;
+    margin: 0;
+    text-align: left; /* Align card list to the left */
+}
+
+.card-pack-info li {
+    margin-bottom: 2px; /* Small space between list items */
+    font-size: 0.9em; /* Slightly smaller font size */
+}
