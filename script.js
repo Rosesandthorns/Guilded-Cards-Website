@@ -1,10 +1,17 @@
-// Import the necessary Firebase modules
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+// Import Firebase modules from the CDN
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js";
 
-// Firebase configuration object (ensure your environment variable is set up correctly)
+// Ensure Firebase API key is available
+const firebaseApiKey = import.meta.env?.VITE_Firebase_Key || process.env.Firebase_Key;
+if (!firebaseApiKey) {
+  console.error("Firebase API Key is missing! Make sure it's set in your environment variables.");
+}
+
+// Firebase configuration object
 const firebaseConfig = {
-  apiKey: process.env.Firebase_Key, // Ensure this variable is exposed appropriately in your build config
+  apiKey: firebaseApiKey,
   authDomain: "guilded-cards.firebaseapp.com",
   projectId: "guilded-cards",
   storageBucket: "guilded-cards.firebasestorage.app",
@@ -16,19 +23,20 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
 
-// Function to fetch user data from the 'users' collection
+// Function to fetch user data from Firestore
 async function fetchUserData() {
   try {
-    const collectionRef = collection(db, 'users'); // Use the correct collection name
+    const collectionRef = collection(db, 'users');
     const snapshot = await getDocs(collectionRef);
 
     if (snapshot.empty) {
       console.log('No documents found');
-      return []; // Return an empty array if no documents are found
+      return [];
     }
 
-    // Map through the documents and validate required fields
     const data = snapshot.docs.map(doc => {
       const docData = doc.data();
 
@@ -36,9 +44,8 @@ async function fetchUserData() {
         console.warn(`Document ${doc.id} missing required fields`);
         return null;
       }
-
       return docData;
-    }).filter(Boolean); // Remove any null values from missing required fields
+    }).filter(Boolean);
 
     console.log('Fetched user data:', data);
     return data;
@@ -47,9 +54,36 @@ async function fetchUserData() {
   }
 }
 
-// Example of how to use the function:
+// Google Sign-In Function
+async function signInWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    console.log("User signed in:", user);
+    document.getElementById("content").innerHTML = `<p>Welcome, ${user.displayName}!</p>`;
+  } catch (error) {
+    console.error("Google Sign-In error:", error);
+  }
+}
+
+// Google Sign-Out Function
+async function signOutUser() {
+  try {
+    await signOut(auth);
+    console.log("User signed out.");
+    document.getElementById("content").innerHTML = "<p>You have signed out.</p>";
+  } catch (error) {
+    console.error("Sign-out error:", error);
+  }
+}
+
+// Attach event listeners to the sign-in button
+document.getElementById("googleSignInButton").addEventListener("click", signInWithGoogle);
+
+// Example usage of fetching Firestore data
 fetchUserData().then(userData => {
   if (userData) {
-    // Do something with the fetched userData array
+    console.log("User Data:", userData);
   }
 });
