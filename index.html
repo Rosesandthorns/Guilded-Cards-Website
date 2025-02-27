@@ -27,7 +27,8 @@
 
     <script type="module" src="CoinGemUserData.js"></script>
     <script type="module">
-        import { getAuth, onAuthStateChanged } from "firebase/auth";
+        // Import from CDN
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { displayUserStatsRealtime, stopListening } from "./CoinGemUserData.js";
 
         const auth = getAuth(); // Initialize auth OUTSIDE onAuthStateChanged
@@ -46,7 +47,7 @@
                 // User is signed out.
                 console.log("User is not signed in.");
                 if (unsubscribe) {
-                    stopListening(unsubscribe);
+                  stopListening(unsubscribe);
                 }
                 document.getElementById("gems-count").textContent = "Not Logged In";
                 document.getElementById("tokens-count").textContent = "Not Logged In";
