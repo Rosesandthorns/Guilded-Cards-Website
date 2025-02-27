@@ -3,10 +3,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebas
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js";
 
-// Ensure Firebase API key is available
-const firebaseApiKey = import.meta.env?.VITE_Firebase_Key || process.env.Firebase_Key;
+// Retrieve Firebase API Key from Netlify environment variables
+const firebaseApiKey = import.meta.env.VITE_Firebase_Key; // ✅ Correct for Netlify + Vite
+
 if (!firebaseApiKey) {
-  console.error("Firebase API Key is missing! Make sure it's set in your environment variables.");
+  console.error("❌ Firebase API Key is missing! Ensure it's set in Netlify environment variables as VITE_Firebase_Key.");
 }
 
 // Firebase configuration object
@@ -39,7 +40,6 @@ async function fetchUserData() {
 
     const data = snapshot.docs.map(doc => {
       const docData = doc.data();
-
       if (!docData.gmail || !docData.uid) {
         console.warn(`Document ${doc.id} missing required fields`);
         return null;
@@ -47,10 +47,10 @@ async function fetchUserData() {
       return docData;
     }).filter(Boolean);
 
-    console.log('Fetched user data:', data);
+    console.log('✅ Fetched user data:', data);
     return data;
   } catch (error) {
-    console.error("Firebase error:", error);
+    console.error("❌ Firebase error:", error);
   }
 }
 
@@ -60,10 +60,10 @@ async function signInWithGoogle() {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    console.log("User signed in:", user);
+    console.log("✅ User signed in:", user);
     document.getElementById("content").innerHTML = `<p>Welcome, ${user.displayName}!</p>`;
   } catch (error) {
-    console.error("Google Sign-In error:", error);
+    console.error("❌ Google Sign-In error:", error);
   }
 }
 
@@ -71,10 +71,10 @@ async function signInWithGoogle() {
 async function signOutUser() {
   try {
     await signOut(auth);
-    console.log("User signed out.");
+    console.log("✅ User signed out.");
     document.getElementById("content").innerHTML = "<p>You have signed out.</p>";
   } catch (error) {
-    console.error("Sign-out error:", error);
+    console.error("❌ Sign-out error:", error);
   }
 }
 
@@ -84,6 +84,6 @@ document.getElementById("googleSignInButton").addEventListener("click", signInWi
 // Example usage of fetching Firestore data
 fetchUserData().then(userData => {
   if (userData) {
-    console.log("User Data:", userData);
+    console.log("✅ User Data:", userData);
   }
 });
