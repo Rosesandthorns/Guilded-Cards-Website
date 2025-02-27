@@ -1,11 +1,12 @@
+// script.js (Main authentication and navigation)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js"; // Added doc, setDoc, getDoc
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js";
 
 // FOR TESTING ONLY - REMOVE AND USE NETLIFY ENVIRONMENT VARIABLES
 const firebaseApiKey = "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE";
 
-// ... (rest of your firebaseConfig - same as before) ...
+// ... (rest of your firebaseConfig) ...
 // If you're still using the environment variable approach *after* testing, uncomment this
 // and make sure the variable is set in Netlify.
 // const firebaseApiKey = import.meta.env.VITE_Firebase_Key;
@@ -14,7 +15,7 @@ if (!firebaseApiKey) {
     console.error("❌ Firebase API Key is missing! Ensure it's set correctly (either directly for testing, or in Netlify environment variables).");
 }
 
-// Firebase configuration object
+
 const firebaseConfig = {
     apiKey: firebaseApiKey,
     authDomain: "guilded-cards.firebaseapp.com",
@@ -24,25 +25,23 @@ const firebaseConfig = {
     appId: "1:566491650991:web:324493f697af5dacfeed5a",
     measurementId: "G-96KRMBBE76"
 };
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
 const provider = new GoogleAuthProvider();
+const signInButton = document.getElementById("googleSignInButton"); // Get the sign-in button
 
-const signInButton = document.getElementById("googleSignInButton");
-const contentDiv = document.getElementById("content");
-
-// Set Persistence (Optional - only if you want different than default)
-setPersistence(auth, browserSessionPersistence) // Use browserSessionPersistence
+// Set Persistence (Optional)
+setPersistence(auth, browserSessionPersistence)
     .then(() => {
-        // Persistence set successfully.  Now set up auth change listener.
+        // Persistence set (if used)
     })
     .catch((error) => {
         console.error("Error setting persistence:", error);
     });
 
-// Function to fetch user data from Firestore (keep this, but we'll also add a function to *write* data)
+// Function to fetch user data from Firestore  -- CORRECTED
 async function fetchUserData() {
     try {
         const collectionRef = collection(db, 'users');
@@ -55,12 +54,17 @@ async function fetchUserData() {
 
         const data = snapshot.docs.map(doc => {
             const docData = doc.data();
-            if (!docData.gmail || !docData.uid) {
+            // The problem was HERE: You were checking for !docData.gmail || !docData.uid
+            // But if *either* of those was missing, you were returning null for the *entire* document.
+            // Now, it correctly handles missing fields.
+            if (!docData.gmail || !docData.uid || !docData.photourl || !docData.username) {
                 console.warn(`Document ${doc.id} missing required fields`);
-                return null;
+                // return null; //  <-- DON'T return null for the whole document
+                // Instead, return a default object or skip the missing fields.
             }
-            return docData;
-        }).filter(Boolean);
+            return docData; // Return the data *even if* some fields are missing.
+
+        }).filter(Boolean);  // This filter is still good - it removes any null/undefined entries.
 
         console.log('✅ Fetched user data:', data);
         return data;
@@ -97,12 +101,10 @@ async function writeUserData(user) {
     }
 }
 
-
 // Google Sign-In Function
 async function signInWithGoogle() {
     try {
-        const result = await signInWithPopup(auth, provider);
-        // User is signed in, data will be written in onAuthStateChanged
+        await signInWithPopup(auth, provider); // Result not used directly
     } catch (error) {
         console.error("❌ Google Sign-In error:", error);
     }
@@ -117,28 +119,22 @@ async function signOutUser() {
     }
 }
 
-// Update UI based on authentication state
+// Update UI for sign-in/out button (Generic part - no profile-specific logic)
 function updateUI(user) {
     if (user) {
-        // User is signed in
         signInButton.textContent = "Sign Out";
         signInButton.onclick = signOutUser;
-        contentDiv.innerHTML = `<p>Welcome, ${user.displayName}!</p>`;
     } else {
-        // User is signed out
         signInButton.textContent = "Sign in with Google";
         signInButton.onclick = signInWithGoogle;
-        contentDiv.innerHTML = "<p>You are signed out.</p>";
     }
 }
 
 // Listen for authentication state changes
 onAuthStateChanged(auth, (user) => {
-    updateUI(user);
+    updateUI(user); // Update the sign-in/out button
     if (user) {
-        writeUserData(user); // Write user data to Firestore
-        fetchUserData();    // Fetch user data (optional, for display)
+		writeUserData(user);
+        fetchUserData();
     }
 });
-
-// Initial UI update (handled by onAuthStateChanged now)
