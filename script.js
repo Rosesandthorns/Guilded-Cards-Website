@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js";
-
+import {updateProfilePage} from "./profile.js"
 // ... (rest of your firebaseConfig - KEEP THIS) ...
 const firebaseApiKey = "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE";
 
@@ -142,14 +142,18 @@ function updateUI(user) {
 // Export a function that sets up the listener.  This is key! -- MODIFIED
 export function setupAuthListener() {
     onAuthStateChanged(auth, async (user) => { // Make this async
+        console.log("onAuthStateChanged triggered. User:", user); // LOG 1: Check user
+
         updateUI(user);
+
         if (user) {
-           await writeUserData(user); // Wait for write to complete
-           const userData = await fetchUserData(); // Wait for fetch, and store the result
+            await writeUserData(user);
+            const userData = await fetchUserData();
             if (userData) {
-                updateGemTokenDisplay(userData.gems || 0, userData.tokens || 0); // Display fetched values, default to 0
+                updateGemTokenDisplay(userData.gems || 0, userData.tokens || 0);
             }
         }
+        updateProfilePage(user); // Call updateProfilePage here!
     });
 }
 
