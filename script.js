@@ -1,9 +1,9 @@
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs } = require("firebase/firestore");
+vimport { initializeApp } from 'firebase/app';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
-// Import the existing firebase configuration
+// Import the existing Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.Firebase_Key,
+  apiKey: process.env.Firebase_Key, // Make sure this is accessible in your client-side environment
   authDomain: "guilded-cards.firebaseapp.com",
   projectId: "guilded-cards",
   storageBucket: "guilded-cards.firebasestorage.app",
@@ -16,48 +16,40 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-exports.handler = async function (event, context) {
+async function fetchUserData() {
   try {
-    // --- Your Firebase logic here ---
     const collectionRef = collection(db, 'users'); // Use the correct collection name ('users')
-
-    // Validate collection name (optional, you can remove this if you're sure the collection exists)
-    if (!collectionRef.path) {
-      throw new Error('Invalid collection name');
-    }
 
     const snapshot = await getDocs(collectionRef);
 
-    // Check if any documents exist
     if (snapshot.empty) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'No documents found' }),
-      };
+      console.log('No documents found');
+      return; // Return an empty array if no documents are found
     }
 
     const data = snapshot.docs.map(doc => {
       const docData = doc.data();
 
       // You might want to adjust the validation based on your actual fields
-      // For example, checking for 'gmail' and 'uid' instead of 'id' and 'name'
       if (!docData.gmail || !docData.uid) {
         console.warn(`Document ${doc.id} missing required fields`);
-        return null; // Or handle the error differently
+        return null;
       }
 
       return docData;
     }).filter(Boolean); // Remove null values
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(data),
-    };
+    console.log('Fetched user data:', data);
+    return data;
   } catch (error) {
     console.error("Firebase error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
   }
-};
+}
+
+// Example of how to use the function:
+fetchUserData().then(userData => {
+  // Do something with the fetched user data
+  if (userData) {
+    // ... use the userData array ...
+  }
+});
