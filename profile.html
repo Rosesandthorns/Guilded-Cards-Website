@@ -23,14 +23,14 @@
 
     <script type="module">
         // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
-        import { getAuth, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+        import { getAuth, signInAnonymously, signOut } from "firebase/auth";
+        import { getFirestore } from "firebase/firestore";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", //Replace with your api key
+            apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // Your API key
             authDomain: "guilded-cards.firebaseapp.com",
             projectId: "guilded-cards",
             storageBucket: "guilded-cards.firebasestorage.app",
@@ -58,26 +58,15 @@
                         console.error("Error signing in: ", error);
                     });
             } else {
-                signOut(auth).then(() => {
-                    authButton.textContent = 'Sign In';
-                    console.log("User Signed out");
-                }).catch((error) => {
-                    console.log("Error signing out: ", error);
-                });
+                signOut(auth)
+                    .then(() => {
+                        authButton.textContent = 'Sign In';
+                        console.log("User Signed out");
+                    })
+                    .catch((error) => {
+                        console.error("Error signing out: ", error);
+                    });
             }
-        });
-
-        // Example of how to write data to firestore.
-        addDoc(collection(db, "users"), {
-            first: "Ada",
-            last: "Lovelace",
-            born: 1815
-        })
-        .then((docRef) => {
-            console.log("Document written with ID: ", docRef.id);
-        })
-        .catch((error) => {
-            console.error("Error adding document: ", error);
         });
     </script>
     <script src="script.js"></script>
