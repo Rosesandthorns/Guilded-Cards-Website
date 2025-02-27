@@ -182,7 +182,7 @@ async function initializeUserData(userId) {
 }
 
 // --- setupGuildButtons function ---
-export function setupGuildButtons(auth) {
+ function setupGuildButtons(auth) {
     for (const guildName in guildData) {
         const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
         const button = document.getElementById(buttonId);
@@ -202,5 +202,5 @@ export function setupGuildButtons(auth) {
     }
 }
 
-// Combined Export Statement
-export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening };
+// Corrected Combined Export Statement
+export { changeGuild, updateGuildButtonStates, setupGuildButtons };
