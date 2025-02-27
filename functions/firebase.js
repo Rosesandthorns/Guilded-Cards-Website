@@ -1,30 +1,44 @@
 const { initializeApp } = require('firebase/app');
-const { getFirestore } = require("firebase/firestore");
+const { getFirestore, collection, getDocs } = require("firebase/firestore");
 
 exports.handler = async function (event, context) {
     try {
-        const firebaseConfig = {
-            apiKey: process.env.Firebase_Key,
-            authDomain: "guilded-cards.firebaseapp.com",
-            projectId: "guilded-cards",
-            storageBucket: "guilded-cards.firebasestorage.app",
-            messagingSenderId: "566491650991",
-            appId: "1:566491650991:web:324493f697af5dacfeed5a",
-            measurementId: "G-96KRMBBE76"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // ... (Firebase config and initialization - same as before)
 
         // --- Your Firebase logic here ---
-        // Example: Fetching data from Firestore
-        const collectionRef = collection(db, 'your-collection-name'); // Replace 'your-collection-name'
+        // Example: Fetching data from Firestore with error handling and data validation
+        const collectionRef = collection(db, 'your-collection-name');
+
+        // Validate collection name
+        if (!collectionRef.path) {
+            throw new Error('Invalid collection name');
+        }
+
         const snapshot = await getDocs(collectionRef);
-        const data = snapshot.docs.map(doc => doc.data());
+
+        // Check if any documents exist
+        if (snapshot.empty) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify({ message: 'No documents found' }),
+            };
+        }
+
+        const data = snapshot.docs.map(doc => {
+            const docData = doc.data();
+
+            // Basic data validation (example)
+            if (!docData.id || !docData.name) {
+                console.warn(`Document ${doc.id} missing required fields`);
+                return null; // Or handle the error differently
+            }
+
+            return docData;
+        }).filter(Boolean); // Remove null values
 
         return {
             statusCode: 200,
-            body: JSON.stringify(data), // Return fetched data
+            body: JSON.stringify(data),
         };
     } catch (error) {
         console.error("Firebase error:", error);
