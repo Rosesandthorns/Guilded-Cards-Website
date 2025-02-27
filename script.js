@@ -3,11 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebas
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js";
 
-// Retrieve Firebase API Key from Netlify environment variables
-const firebaseApiKey = import.meta.env.VITE_Firebase_Key; // ✅ Correct for Netlify + Vite
+// FOR TESTING ONLY - REMOVE THIS AND USE NETLIFY ENVIRONMENT VARIABLES
+const firebaseApiKey = "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE";
+
+// If you're still using the environment variable approach *after* testing, uncomment this
+// and make sure the variable is set in Netlify.
+// const firebaseApiKey = import.meta.env.VITE_Firebase_Key;
 
 if (!firebaseApiKey) {
-  console.error("❌ Firebase API Key is missing! Ensure it's set in Netlify environment variables as VITE_Firebase_Key.");
+  console.error("❌ Firebase API Key is missing! Ensure it's set correctly (either directly for testing, or in Netlify environment variables).");
 }
 
 // Firebase configuration object
@@ -51,6 +55,7 @@ async function fetchUserData() {
     return data;
   } catch (error) {
     console.error("❌ Firebase error:", error);
+    return []; // Return an empty array on error.  Important for later use.
   }
 }
 
@@ -87,3 +92,9 @@ fetchUserData().then(userData => {
     console.log("✅ User Data:", userData);
   }
 });
+
+// Attach event listener for sign-out button (if you add one later)
+const signOutButton = document.getElementById("signOutButton");  // Get the button element
+if (signOutButton) { // Check if the button exists (it might not on all pages)
+	signOutButton.addEventListener("click", signOutUser);
+}
