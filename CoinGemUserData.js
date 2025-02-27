@@ -181,7 +181,7 @@ async function initializeUserData(userId) {
 }
 
 // --- setupGuildButtons function ---
-export function setupGuildButtons(auth) {
+export function setupGuildButtons(auth) { // Export directly
     for (const guildName in guildData) {
         const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
         const button = document.getElementById(buttonId);
@@ -216,4 +216,4 @@ export async function getUserData(userId) {
 
 
 // Corrected Combined Export Statement (NOW TRULY TRULY CORRECT)
-export { changeGuild, updateGuildButtonStates, setupGuildButtons };
+export { changeGuild, updateGuildButtonStates};
