@@ -88,3 +88,116 @@ export function displayUserStatsRealtime(userId, gemsElementId, tokensElementId,
     const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
             const userData = docSnap.data();
+            const gems = userData.Gems;
+            const tokens = userData.Tokens;
+            const guild = userData.guild || "No Guild"; // Default to "No Guild"
+
+            document.getElementById(gemsElementId).textContent = gems;
+            document.getElementById(tokensElementId).textContent = tokens;
+            document.getElementById(guildElementId).textContent = guild; // Update guild display
+
+            // Update Guild Buttons based on data
+            updateGuildButtonStates(userId);
+
+        } else {
+            console.log("No such document! Initializing...");
+            initializeUserData(userId)
+                .then(() => {
+                    displayUserStatsRealtime(userId, gemsElementId, tokensElementId, guildElementId);
+                })
+                .catch(err => console.error("Error initializing user data", err));
+        }
+    }, (error) => {
+        console.error("Error listening for document changes:", error);
+        document.getElementById(gemsElementId).textContent = 'Error';
+        document.getElementById(tokensElementId).textContent = 'Error';
+         document.getElementById(guildElementId).textContent = 'Error';
+    });
+    return unsubscribe;
+}
+
+
+
+// --- New Function: Update Guild Button States ---
+async function updateGuildButtonStates(userId) {
+    const userDocRef = doc(db, "users", userId);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+        return;
+    }
+
+    const userData = userDocSnap.data();
+    const now = Date.now();
+    const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+
+    // Check cooldown
+    let isOnCoolDown = false;
+    if (userData.lastGuildChange) {
+        const lastChangeTime = userData.lastGuildChange.toDate();
+        if (now - lastChangeTime < oneWeekInMs) {
+            isOnCoolDown = true;
+        }
+    }
+
+    // Loop through ALL guilds in guildData (more robust)
+    for (const guildName in guildData) {
+        const button = document.getElementById(`${guildName.toLowerCase().replace(/\s+/g, '-')}-button`); // Create consistent IDs
+        if (!button) {
+            console.warn(`Button for guild "${guildName}" not found!`);  // Helpful warning
+            continue;
+        }
+         const cost = guildData[guildName] ? guildData[guildName].cost : 10;
+
+        if (userData.guild === guildName) {
+            button.disabled = true;
+            button.classList.add("current-guild");
+            button.classList.remove("locked-guild");
+        } else if (isOnCoolDown || userData.Tokens < cost) {
+            button.disabled = true;
+            button.classList.add("locked-guild");
+            button.classList.remove("current-guild");
+        } else {
+            button.disabled = false;
+            button.classList.remove("current-guild", "locked-guild");
+        }
+    }
+}
+
+// --- Existing Functions (with slight modifications) ---
+
+// Function to stop listening for real-time updates.
+export function stopListening(unsubscribeFunction) {
+    if (unsubscribeFunction) {
+        unsubscribeFunction();
+    }
+}
+
+// Function to initialize user data in Firestore IF it doesn't exist.
+async function initializeUserData(userId) {
+    const userDocRef = doc(db, "users", userId);
+     const docSnap = await getDoc(userDocRef);
+    if (!docSnap.exists())
+    {
+        const initialData = {
+          Gems: 5,
+          Tokens: 5,
+          guild: "No Guild",       // Initialize with no guild
+          lastGuildChange: null, // Initialize lastGuildChange
+          gmail: "powwerofpowwer@gmail.com", // Consider getting this from the auth object!
+          photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth object!
+        };
+
+        try {
+            await setDoc(userDocRef, initialData);
+            console.log("User data initialized for:", userId);
+        } catch (error) {
+            console.error("Error initializing user data:", error);
+            throw error; // Re-throw the error so the caller can handle it.
+        }
+    }
+
+}
+
+// Export the new function
+export { changeGuild , updateGuildButtonStates};
