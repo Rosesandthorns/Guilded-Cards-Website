@@ -48,11 +48,10 @@
         // Function to handle Google Sign-In
         async function signInWithGoogle() {
             try {
-                const result = await signInWithPopup(auth, googleProvider);
-                console.log("User signed in:", result.user);
+                await signInWithPopup(auth, googleProvider); // Removed unnecessary result variable
             } catch (error) {
                 console.error("Error signing in with Google:", error);
-                // Consider showing an error message to the user here.
+                alert("Error signing in. Please try again."); // More user-friendly error
             }
         }
 
@@ -60,27 +59,20 @@
         async function signOutFromGoogle() {
             try {
                 await signOut(auth);
-                console.log("User signed out");
             } catch (error) {
                 console.error("Error signing out:", error);
-                // Consider showing an error message to the user here.
+                alert("Error signing out. Please try again."); // More user-friendly error
             }
         }
 
         // Example function (you'll need to implement this using your Firebase setup):
 
         async function openCardPack(packId) {
-        // 1. Check if the user has enough tokens.
-        // 2. Deduct a token from the user's balance.
-        // 3. Call your Firebase function to get the cards for the pack.
-        // 4. Return the cards.
-        // 5. Handle errors (e.g., not enough tokens, pack not found).
-        //    Make sure your Firebase function handles security (only authenticated users
-        //    can open packs, etc.)
 
             const user = auth.currentUser;
             if (!user) {
-            throw new Error("User not signed in."); // Or handle the unsigned-in state
+                alert("Please sign in to open packs."); // User-friendly message
+                return; // Stop the function if not signed in
             }
 
             const openPackFunction = httpsCallable(functions, 'openPack'); // Replace 'openPack'
@@ -91,52 +83,151 @@
             catch(error){
                 console.error("Error opening pack:", error);
                 alert("Failed to open the pack. Please try again later."); // User-friendly error
-                throw error; // Re-throw to handle it further up if needed
 
             }
         }
 
         const packsData = {
-        "starter-pack": {
-            name: "Starter Pack",
-            image: "starter-pack-image.png", // Replace with actual image path
-            price: 1, // 1 Token
-            cards: [1, 2, 3, 17, 33, 34, 35], // Card IDs in this pack
-        },
-        "basics-pack": {
-            name: "The Basics",
-            image: "basics-pack-image.png", // Replace
-            price: 3,
-            cards: [1, 2, 3, 4, 5, 6],
-        },
-        "guild-wars-pack": {
-            name: "Guild Wars",
-            image: "guild-wars-pack-image.png", // Replace
-            price: 5,
-            cards: [10, 11, 12, 13, 17, 18, 19, 20, 21, 22, 34, 35, 36, 37, 38, 41],
-        },
-        "here-be-dragons-pack": {
-            name: "Here be Dragons",
-            image: "here-be-dragons-pack-image.png", // Replace
-            price: 4,
-            cards: [23, 24, 25, 26, 27, 28, 29, 33],
-        },
+            "basics-pack": {
+                name: "The Basics",
+                image: "basics-pack-image.png", // Replace with the actual image path
+                price: 1, // 1 Token
+                cards: [1, 2, 3, 4, 5, 6, 17, 33, 34, 35], // Combined card IDs
+            },
+            "guild-wars-pack": {
+                name: "Guild Wars",
+                image: "guild-wars-pack-image.png", // Replace
+                price: 5,
+                cards: [10, 11, 12, 13, 17, 18, 19, 20, 21, 22, 34, 35, 36, 37, 38, 41],
+            },
+            "here-be-dragons-pack": {
+                name: "Here be Dragons",
+                image: "here-be-dragons-pack-image.png", // Replace
+                price: 4,
+                cards: [23, 24, 25, 26, 27, 28, 29, 33],
+            },
+        };
 
-    };
+        const cardsData = {
+            1: { name: "Shield Bug", rarity: "Starter", pack: "The Basics" },
+            2: { name: "Stone Golem", rarity: "Starter", pack: "The Basics" },
+            3: { name: "White Snow", rarity: "Starter", pack: "The Basics" },
+            4: { name: "Void Bug", rarity: "Uncommon", pack: "The Basics" },
+            5: { name: "Void Golem", rarity: "Uncommon", pack: "The Basics" },
+            6: { name: "Black Snow", rarity: "Uncommon", pack: "The Basics" },
+            10: { name: "Hesta the Merchant", rarity: "Rare", pack: "Guild Wars" },
+            11: { name: "Golden Guard", rarity: "Rare", pack: "Guild Wars" },
+            12: { name: "Golden Relic", rarity: "Elusive", pack: "Guild Wars" },
+            13: { name: "Golden Crown", rarity: "Elusive", pack: "Guild Wars" },
+            17: { name: "Mana Deposit", rarity: "Starter", pack: "The Basics" }, // Changed pack
+            18: { name: "Mad Mana", rarity: "Uncommon", pack: "Guild Wars" },
+            19: { name: "Elder Gorsh", rarity: "Rare", pack: "Guild Wars" },
+            20: { name: "Moro the Sniper", rarity: "Rare", pack: "Guild Wars" },
+            21: { name: "Doomsday Device", rarity: "Elusive", pack: "Guild Wars" },
+            22: { name: "Dragon Tamer", rarity: "Elusive", pack: "Guild Wars" },
+            23: { name: "Plasma Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            24: { name: "Glacial Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            25: { name: "Infernal Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            26: { name: "Borrowing Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            27: { name: "Aquatic Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            28: { name: "Nuclear Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            29: { name: "Cursed Dragon", rarity: "Rare", pack: "Here be Dragons" },
+            33: { name: "Dragon Saddle", rarity: "Starter", pack: "The Basics" },  // Changed pack
+            34: { name: "Jolo the Hotshot", rarity: "Starter", pack: "The Basics" }, // Changed pack
+            35: { name: "Jolo's Supreme Handbook", rarity: "Starter", pack: "The Basics" }, // Changed pack
+            36: { name: "Jolo's Pistol", rarity: "Uncommon", pack: "Guild Wars" },
+            37: { name: "Powl the Proud", rarity: "Rare", pack: "Guild Wars" },
+            38: { name: "Hela the Healer", rarity: "Elusive", pack: "Guild Wars" },
+            41: { name: "Hextor the Judgmental", rarity: "Elusive", pack: "Guild Wars" },
+        };
 
-    const cardsData = {
-        1: { name: "Shield Bug", rarity: "Starter", pack: "The Basics" },
-        2: { name: "Stone Golem", rarity: "Starter", pack: "The Basics" },
-        3: { name: "White Snow", rarity: "Starter", pack: "The Basics" },
-        4: { name: "Void Bug", rarity: "Uncommon", pack: "The Basics" },
-        5: { name: "Void Golem", rarity: "Uncommon", pack: "The Basics" },
-        6: { name: "Black Snow", rarity: "Uncommon", pack: "The Basics" },
-        10: { name: "Hesta the Merchant", rarity: "Rare", pack: "Guild Wars" },
-        11: { name: "Golden Guard", rarity: "Rare", pack: "Guild Wars" },
-        12: { name: "Golden Relic", rarity: "Elusive", pack: "Guild Wars" },
-        13: { name: "Golden Crown", rarity: "Elusive", pack: "Guild Wars" },
-        17: { name: "Mana Deposit", rarity: "Starter", pack: "Guild Wars" },
-        18: { name: "Mad Mana", rarity: "Uncommon", pack: "Guild Wars" },
-        19: { name: "Elder Gorsh", rarity: "Rare", pack: "Guild Wars" },
-        20: { name: "Moro the Sniper", rarity: "Rare", pack: "Guild Wars" },
-        21: { name: "Doomsday Device", rarity: "Elusive", pack: "Guild Wars" },
+            function generatePackHTML(packId, packData) {
+            let cardListHTML = '<ul>';
+                for (const cardId of packData.cards) {
+                    const card = cardsData[cardId];
+                    cardListHTML += `<li>${card.name} (${card.rarity})</li>`;
+                }
+                cardListHTML += '</ul>';
+
+            return `
+                <div class="card-pack" data-pack-id="${packId}">
+                    <img src="${packData.image}" alt="${packData.name}" class="card-pack-image">
+                    <div class="card-pack-info">
+                        <h3 class="card-pack-name">${packData.name}</h3>
+                        <p class="card-pack-price">
+                            <img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> ${packData.price} Token${packData.price > 1 ? 's' : ''}
+                        </p>
+                        <p class = "card-pack-available">Cards in pack:</p>
+                        ${cardListHTML}
+                        <button class="open-pack-button">Open Pack</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const gemTokenContainer = document.getElementById("gemTokenContainer");
+            const signInButton = document.getElementById("googleSignInButton");
+            const cardPacksContainer = document.getElementById('card-packs-container');
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    const userId = user.uid;
+                    if (unsubscribeStats) {
+                        stopListening(unsubscribeStats);
+                    }
+                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
+
+                    signInButton.querySelector("#button-text").textContent = "Sign Out";
+                    signInButton.onclick = signOutFromGoogle;
+
+                } else {
+                    if (unsubscribeStats) {
+                        stopListening(unsubscribeStats);
+                    }
+                    document.getElementById("gems-count").textContent = "";
+                    document.getElementById("tokens-count").textContent = "";
+
+                    signInButton.querySelector("#button-text").textContent = "Sign in with Google";
+                    signInButton.onclick = signInWithGoogle;
+                }
+
+                gemTokenContainer.classList.remove('loading');
+                signInButton.classList.remove('loading');
+            });
+
+            signInButton.onclick = signInWithGoogle;
+
+             // Generate HTML for each pack
+            let packsHTML = "<h2>Card Packs</h2>";
+            for (const packId in packsData) {
+                if (packsData.hasOwnProperty(packId)) {
+                    packsHTML += generatePackHTML(packId, packsData[packId]);
+                }
+            }
+            cardPacksContainer.innerHTML = packsHTML; // Set the inner HTML *once*
+
+
+            // Event delegation for open pack buttons:
+            cardPacksContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('open-pack-button')) {
+                    const cardPackDiv = event.target.closest('.card-pack');
+                    const packId = cardPackDiv.dataset.packId;
+
+                    // Call the openCardPack function
+                    openCardPack(packId)
+                        .then(cards => {
+                            //Display the opened cards (you'll create a function for this)
+                            console.log("Cards received:", cards);
+                            alert(`Opened pack ${packId} and received cards: ${JSON.stringify(cards)}`);
+                        })
+                        .catch(error => {
+                            //Error handling (optional, since openCardPack has its own)
+                        });
+                }
+            });
+        }); // <---  THIS WAS THE MISSING CLOSING BRACE!
+    </script>
+</body>
+</html>
