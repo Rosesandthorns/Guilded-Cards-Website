@@ -201,7 +201,6 @@ export function setupGuildButtons(auth) {
     }
 }
 
-//NEW FUNCTION
 // --- Get User Data ---
 export async function getUserData(userId) {
     const userDocRef = doc(db, "users", userId);
@@ -211,10 +210,10 @@ export async function getUserData(userId) {
         return userDocSnap.data();
     } else {
         console.log("No such document!");
-        return null; // Or throw an error, or return default data
+        return null;
     }
 }
 
 
-// Combined Export Statement
+// Corrected Combined Export Statement
 export { changeGuild, updateGuildButtonStates, setupGuildButtons, displayUserStatsRealtime, stopListening, getUserData };
