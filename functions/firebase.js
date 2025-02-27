@@ -4,8 +4,12 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 exports.handler = async function (event, context) {
     try {
-        // Retrieve Firebase API Key from Netlify environment variables (process.env)
-        const firebaseApiKey = process.env.VITE_Firebase_Key;
+        // FOR TESTING ONLY - REMOVE AND USE process.env.VITE_Firebase_Key
+        const firebaseApiKey = "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE";
+
+        //  Uncomment this line after testing, and set the variable in Netlify
+        // const firebaseApiKey = process.env.VITE_Firebase_Key;
+
 
         if (!firebaseApiKey) {
             console.error("❌ Firebase API Key is missing from Netlify environment variables (VITE_Firebase_Key)!");
