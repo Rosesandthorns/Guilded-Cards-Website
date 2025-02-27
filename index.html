@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Home</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles for loading state */
+        .loading-indicator {
+            display: none; /* Hidden by default */
+        }
+        .loading .loading-indicator {
+            display: inline; /* Show when parent has 'loading' class */
+        }
+        .loading #gems-count,
+        .loading #tokens-count,
+        .loading #button-text {
+            display: none; /* Hide actual content during loading */
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -12,11 +26,14 @@
             <a href="index.html">Home</a>
             <a href="cards.html">Cards</a>
             <a href="profile.html">Profile</a>
-            <div id="gemTokenContainer">
-               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count">Loading...</span></p>
-                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count">Loading...</span></p>
+            <div id="gemTokenContainer" class="loading">
+               <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
+                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" style="width: 20px; height: 20px; vertical-align: middle;"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
             </div>
-            <button id="googleSignInButton">Sign in with Google</button>
+             <button id="googleSignInButton" class="loading">
+              <span id="button-text">Sign in with Google</span>
+              <span id="button-loading" class="loading-indicator">Loading...</span>
+            </button>
         </nav>
     </header>
     <main>
@@ -33,16 +50,17 @@
         const auth = getAuth();
         const googleProvider = new GoogleAuthProvider();
         let unsubscribe;
+        let unsubscribeStats;
+
 
         // Function to handle Google Sign-In
         async function signInWithGoogle() {
             try {
                 const result = await signInWithPopup(auth, googleProvider);
-                // The user is signed in.
-                // You can get user information from result.user if needed.
                 console.log("User signed in:", result.user);
             } catch (error) {
                 console.error("Error signing in with Google:", error);
+                // Consider showing an error message to the user here.
             }
         }
 
@@ -53,40 +71,50 @@
                 console.log("User signed out");
             } catch (error) {
                 console.error("Error signing out:", error);
+                // Consider showing an error message to the user here.
             }
         }
 
+        document.addEventListener('DOMContentLoaded', () => { // Wait for DOM to be ready
 
-        onAuthStateChanged(auth, (user) => {
-            const signInButton = document.getElementById("googleSignInButton"); //Get the button
+            const gemTokenContainer = document.getElementById("gemTokenContainer");
+            const signInButton = document.getElementById("googleSignInButton");
+            onAuthStateChanged(auth, (user) => {
 
-            if (user) {
-                const userId = user.uid;
-                if (unsubscribe) {
-                    stopListening(unsubscribe);
+                if (user) {
+                    const userId = user.uid;
+                    if (unsubscribeStats) {
+                        stopListening(unsubscribeStats);
+                    }
+                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
+
+                    // Change button to Sign Out
+                    signInButton.querySelector("#button-text").textContent = "Sign Out";  // Update the inner span
+                    signInButton.onclick = signOutFromGoogle;
+
+                } else {
+                    console.log("User is not signed in.");
+                    if (unsubscribeStats) {
+                        stopListening(unsubscribeStats);
+                    }
+                    document.getElementById("gems-count").textContent = ""; // Clear, not "Not Logged In"
+                    document.getElementById("tokens-count").textContent = ""; // Clear
+
+                    // Change button back to Sign In
+                    signInButton.querySelector("#button-text").textContent = "Sign in with Google"; // Update inner span
+                    signInButton.onclick = signInWithGoogle;
                 }
-                unsubscribe = displayUserStatsRealtime(userId, "gems-count", "tokens-count");
 
-                // Change button to Sign Out
-                signInButton.textContent = "Sign Out";
-                signInButton.onclick = signOutFromGoogle; // Attach sign-out function
+              // Remove loading class *after* auth state is known
+                gemTokenContainer.classList.remove('loading');
+                signInButton.classList.remove('loading');
+            });
 
-            } else {
-                console.log("User is not signed in.");
-                if (unsubscribe) {
-                    stopListening(unsubscribe);
-                }
-                document.getElementById("gems-count").textContent = "Not Logged In";
-                document.getElementById("tokens-count").textContent = "Not Logged In";
+            // Initial setup: Add click listener to the sign-in button, but only *after* DOMContentLoaded
+              signInButton.onclick = signInWithGoogle; // Now safe to access the button
 
-                // Change button back to Sign In
-                signInButton.textContent = "Sign in with Google";
-                signInButton.onclick = signInWithGoogle; // Attach sign-in function
-            }
-        });
+        }); // DOMContentLoaded end
 
-        // Initial setup: Add click listener to the sign-in button
-        document.getElementById("googleSignInButton").onclick = signInWithGoogle;
 
     </script>
 </body>
