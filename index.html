@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guilded Cards - Home</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet"> 
 </head>
 <body>
     <header>
@@ -33,13 +33,13 @@
             <div class="dark-overlay"></div>
             <div class="guild-selection-area">
                 <div class="scroll-text-container">
-                    <p class="scroll-text">
+                    <p class="scroll-text midnight-flame-text"> 
                         The 6 Forges Lay in the Sky<br>
                         One for every guild<br>
                         One for every cry
                     </p>
                 </div>
-                 <div id="guild-buttons">
+                <div id="guild-buttons">
                     <button id="golden-guild-button">Golden Guild</button>
                     <button id="mystic-guild-button">Mystic Guild</button>
                     <button id="justice-guild-button">Justice Guild</button>
@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <div id="content"></div>
+        <div id="content"></div> 
     </main>
 
     <script type="module" src="CoinGemUserData.js"></script>
@@ -61,7 +61,6 @@
         const googleProvider = new GoogleAuthProvider();
         let unsubscribeStats;
 
-        // Function to handle Google Sign-In
         async function signInWithGoogle() {
             try {
                 await signInWithPopup(auth, googleProvider);
@@ -70,7 +69,6 @@
             }
         }
 
-        // Function to handle Sign-Out
         async function signOutFromGoogle() {
             try {
                 await signOut(auth);
@@ -83,7 +81,7 @@
             const gemTokenContainer = document.getElementById("gemTokenContainer");
             const signInButton = document.getElementById("googleSignInButton");
 
-            setupGuildButtons(auth); // Call setupGuildButtons
+            setupGuildButtons(auth); 
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
