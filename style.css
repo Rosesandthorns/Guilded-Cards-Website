@@ -1,4 +1,22 @@
 /* style.css */
+
+/* Add the font-face rule */
+@font-face {
+    font-family: 'Midnight Flame Gothic';
+    src: url('MidnightFlameGothicDemo-1GWMM.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Apply the font to the specific text */
+.midnight-flame-text {
+    font-family: 'Midnight Flame Gothic', cursive;
+    color: #e0d8c3; /* Or any color you prefer */
+    font-size: 2em; /* Adjust the size as needed */
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
