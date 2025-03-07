@@ -249,12 +249,12 @@ export async function fetchCardData(cardId) {
 export function combineCardData(cardInstances, cardsData) {
     console.log("combineCardData called with:", cardInstances, cardsData);
     return cardInstances.map(instance => {
-        const card = cardsData.find(c => c.ID === instance.cardId); // Corrected line
+        const card = cardsData.find(c => c && c.ID === instance.cardId); // Check if c is not null
         if (card) {
             return { ...instance, ...card };
         } else {
             console.error(`Card data not found for instance:`, instance);
-            return { ...instance, ID: 'N/A' }; //Still return, but make ID clear.
+            return instance; // Or you can return a default object
         }
     });
 }
