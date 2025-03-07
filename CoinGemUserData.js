@@ -1,16 +1,16 @@
 // CoinGemUserData.js
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // YOUR API KEY
-  authDomain: "guilded-cards.firebaseapp.com",
-  projectId: "guilded-cards",
-  storageBucket: "guilded-cards.firebasestorage.app",
-  messagingSenderId: "566491650991",
-  appId: "1:566491650991:web:324493f697af5dacfeed5a",
-  measurementId: "G-96KRM8BE76"
+    apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // YOUR API KEY
+    authDomain: "guilded-cards.firebaseapp.com",
+    projectId: "guilded-cards",
+    storageBucket: "guilded-cards.firebasestorage.app",
+    messagingSenderId: "566491650991",
+    appId: "1:566491650991:web:324493f697af5dacfeed5a",
+    measurementId: "G-96KRM8BE76"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -163,11 +163,11 @@ async function initializeUserData(userId) {
     const docSnap = await getDoc(userDocRef);
     if (!docSnap.exists()) {
         const initialData = {
-          Gems: 5,
-          Tokens: 5,
-          guild: "No Guild",
-          lastGuildChange: null,
-          photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth object
+            Gems: 5,
+            Tokens: 5,
+            guild: "No Guild",
+            lastGuildChange: null,
+            photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider auth object
         };
 
         try {
@@ -214,6 +214,36 @@ export async function getUserData(userId) {
     }
 }
 
+// --- Firestore functions for cards ---
+async function fetchCardInstances(userId) {
+  const cardInstancesCollection = collection(db, 'CardInstances');
+  const q = query(cardInstancesCollection, where('Owner', '==', userId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => doc.data());
+}
 
-// Corrected Combined Export Statement (NOW TRULY TRULY CORRECT)
-export { changeGuild, updateGuildButtonStates};
+async function fetchCardData(cardId) {
+  const cardDocRef = doc(db, 'Cards', cardId);
+  const cardDoc = await getDoc(cardDocRef);
+  if (cardDoc.exists()) {
+    return cardDoc.data();
+  } else {
+    console.error(`Card not found with ID: ${cardId}`);
+    return null;
+  }
+}
+
+function combineCardData(cardInstances, cardsData) {
+  return cardInstances.map(instance => {
+    const card = cardsData.find(c => c.ID === instance.ID);
+    if (card) {
+      return { ...instance, ...card };
+    } else {
+      console.error(`Card data not found for instance:`, instance);
+      return instance; // Return instance even if card data is missing
+    }
+  });
+}
+
+// Corrected Combined Export Statement
+export { changeGuild, updateGuildButtonStates, fetchCardInstances, fetchCardData, combineCardData };
