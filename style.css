@@ -63,7 +63,7 @@ main {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
      position: relative; /* Add this to make main a positioning context */
-    z-index: 0; /* Ensure main content is above the background */
+     z-index: 0; /* Ensure main content is above the background */
 }
 
 #profileContent {
@@ -133,10 +133,10 @@ main {
 }
 
 #guild-buttons {
-     margin-top: 20px;
+    margin-top: 20px;
     display: flex;
     flex-wrap: wrap;
-     gap: 10px; /* Add spacing between buttons */
+    gap: 10px; /* Add spacing between buttons */
     justify-content: center; /* Center buttons horizontally */
     z-index: 3;
 }
@@ -173,7 +173,7 @@ main {
     width: 100%;
     height: auto;
     z-index: 1;
-     filter: blur(3px); /* Add the blur here */
+      filter: blur(3px); /* Add the blur here */
     opacity: 0.8; /* Add a little transparency */
 }
 .dark-overlay {
@@ -188,11 +188,11 @@ main {
 .guild-selection-area {
     position: relative;
     z-index: 3;
-     display: flex; /* Use flexbox for layout */
+    display: flex; /* Use flexbox for layout */
     flex-direction: column; /* Stack children vertically */
     align-items: center; /* Center horizontally */
     justify-content: center; /* Center vertically */
-     height: 100%; /* Ensure it takes up the full height */
+    height: 100%; /* Ensure it takes up the full height */
     padding: 20px; /* Add padding */
     box-sizing: border-box; /* Include padding in the height */
 
@@ -280,7 +280,7 @@ main {
     background-color: #367c39; /* Darker green on hover */
 }
 #googleSignInButton{
-     margin-left: 15px; /* Add some spacing from the button */
+    margin-left: 15px; /* Add some spacing from the button */
 
 }
 
@@ -298,4 +298,27 @@ main {
 .card-pack-info li {
     margin-bottom: 2px; /* Small space between list items */
     font-size: 0.9em; /* Slightly smaller font size */
+}
+
+/* Card styling */
+.card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.card img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Card placeholder styling */
+.card-placeholder {
+    width: 100px;
+    height: 150px;
+    border: 1px dashed #ddd;
+    margin: 10px;
+    display: inline-block;
 }
