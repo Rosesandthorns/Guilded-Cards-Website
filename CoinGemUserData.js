@@ -258,3 +258,37 @@ export function combineCardData(cardInstances, cardsData) {
         }
     });
 }
+
+// Function to display cards (added in previous response)
+export function displayCards(cards) {
+    const collectionSection = document.getElementById('collectionSection');
+    collectionSection.innerHTML = ''; // Clear any previous content
+
+    if (cards.length === 0) {
+        // Display a message if no cards are found
+        const noCardsMessage = document.createElement('p');
+        noCardsMessage.textContent = "You don't own any cards yet.";
+        collectionSection.appendChild(noCardsMessage);
+        return;
+    }
+
+    cards.forEach(card => {
+        // Create a container for each card
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('card'); // Add a 'card' class for styling
+
+        // Create the image element
+        const img = document.createElement('img');
+        img.src = card.image; // Use the image URL from the card data
+        img.alt = card.name; // Set the alt text for accessibility
+        cardDiv.appendChild(img);
+
+        // Display the InstanceID
+        const instanceIdP = document.createElement('p');
+        instanceIdP.textContent = `Instance ID: ${card.instanceId}`;
+        cardDiv.appendChild(instanceIdP);
+
+        // Add the card to the collection section
+        collectionSection.appendChild(cardDiv);
+    });
+}
