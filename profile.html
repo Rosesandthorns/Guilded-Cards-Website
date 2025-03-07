@@ -85,7 +85,8 @@
     <main>
         <div id="profileContent">
             <img id="profileImage" src="" alt="Profile Picture">
-            <p id="userEmail">Loading...</p> </div>
+            <p id="userEmail">Loading...</p> 
+        </div>
 
         <div id="deckSection">
             <div class="card-placeholder"></div>
@@ -165,28 +166,39 @@
             }
         }
 
+        // Function to display cards
         function displayCards(cards) {
-          const collectionSection = document.getElementById('collectionSection');
-          collectionSection.innerHTML = ''; // Clear previous cards
+            const collectionSection = document.getElementById('collectionSection');
+            collectionSection.innerHTML = ''; // Clear any previous content
 
-          cards.forEach(card => {
-            const cardElement = document.createElement('div');
-            cardElement.classList.add('card');
+            if (cards.length === 0) {
+                // Display a message if no cards are found
+                const noCardsMessage = document.createElement('p');
+                noCardsMessage.textContent = "You don't own any cards yet.";
+                collectionSection.appendChild(noCardsMessage);
+                return;
+            }
 
-            const imageElement = document.createElement('img');
-            imageElement.src = card.image;
-            imageElement.alt = card.name;
-            cardElement.appendChild(imageElement);
+            cards.forEach(card => {
+                // Create a container for each card
+                const cardDiv = document.createElement('div');
+                cardDiv.classList.add('card'); // Add a 'card' class for styling
 
-            const detailsElement = document.createElement('p');
-            // Now includes Rarity from the instance.
-            detailsElement.textContent = `Name: ${card.name}, Local ID: ${card.localId}, Rarity: ${card.Rarity}`;
-            cardElement.appendChild(detailsElement);
+                // Create the image element
+                const img = document.createElement('img');
+                img.src = card.image; // Use the image URL from the card data
+                img.alt = card.name; // Set the alt text for accessibility
+                cardDiv.appendChild(img);
 
-            collectionSection.appendChild(cardElement);
-          });
+                // Display the InstanceID
+                const instanceIdP = document.createElement('p');
+                instanceIdP.textContent = `Instance ID: ${card.instanceId}`;
+                cardDiv.appendChild(instanceIdP);
+
+                // Add the card to the collection section
+                collectionSection.appendChild(cardDiv);
+            });
         }
-
 
         document.addEventListener('DOMContentLoaded', async () => { // Make async
 
@@ -213,14 +225,14 @@
                         signInButton.onclick = signOutFromGoogle;
                         setupGuildButtons(auth);
 
-                        //Card Display
-                         try {
+                        // Fetch and display cards
+                        try {
                             const cardInstances = await fetchCardInstances(user.uid);
-                            const cardsData = await Promise.all(cardInstances.map(instance => fetchCardData(instance.cardId))); // Use cardId
+                            const cardsData = await Promise.all(cardInstances.map(instance => fetchCardData(instance.cardId)));
                             const cards = combineCardData(cardInstances, cardsData);
                             displayCards(cards);
-                        } catch (error){
-                            console.error("Error loading cards", error)
+                        } catch (error) {
+                            console.error("Error loading cards:", error);
                         }
 
                     } else {
