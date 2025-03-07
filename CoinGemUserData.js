@@ -1,4 +1,3 @@
-// CoinGemUserData.js
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
 import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
@@ -161,7 +160,7 @@ export function stopListening(unsubscribeFunction) {
 // --- initializeUserData ---
 async function initializeUserData(userId) {
     const userDocRef = doc(db, "users", userId); // Firestore ref
-     const docSnap = await getDoc(userDocRef); //Use get to check
+    const docSnap = await getDoc(userDocRef); //Use get to check
     if (!docSnap.exists()) {
         const initialData = {
             Gems: 5,
@@ -220,10 +219,23 @@ export async function fetchCardInstances(userId) {
     const cardInstancesCollection = collection(db, 'CardInstances');
     const q = query(cardInstancesCollection, where('Owner', '==', userId));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data());
+    return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            ...data,
+            instanceId: doc.id, //Include the actual document ID
+            cardId: data.Card,  // Use a descriptive name! (was data.ID)
+        }
+
+    });
 }
 
 export async function fetchCardData(cardId) {
+    console.log("fetchCardData called with cardId:", cardId);
+    if (!cardId) {
+        console.error("fetchCardData called with invalid cardId:", cardId);
+        return null;
+    }
     const cardDocRef = doc(db, 'Cards', cardId);
     const cardDoc = await getDoc(cardDocRef);
     if (cardDoc.exists()) {
@@ -235,13 +247,14 @@ export async function fetchCardData(cardId) {
 }
 
 export function combineCardData(cardInstances, cardsData) {
+    console.log("combineCardData called with:", cardInstances, cardsData);
     return cardInstances.map(instance => {
-        const card = cardsData.find(c => c.ID === instance.ID);
+        const card = cardsData.find(c => c.ID === instance.cardId); // Corrected line
         if (card) {
             return { ...instance, ...card };
         } else {
             console.error(`Card data not found for instance:`, instance);
-            return instance; // Return instance even if card data is missing
+            return { ...instance, ID: 'N/A' }; //Still return, but make ID clear.
         }
     });
 }
