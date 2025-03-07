@@ -1,11 +1,9 @@
 // CoinGemUserData.js
-
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js'; // Added getDocs!
-import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js'; // Import for Realtime Database
+import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE", // YOUR API KEY
+    apiKey: "AIzaSyBODDkKMrgc_eSl5nIPwXf2FzY6MY0o_iE",
     authDomain: "guilded-cards.firebaseapp.com",
     projectId: "guilded-cards",
     storageBucket: "guilded-cards.firebasestorage.app",
@@ -16,7 +14,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const rtdb = getDatabase(app); // Get the Realtime Database instance
 
 // --- Guild Data (Centralized) ---
 const guildData = {
@@ -76,32 +73,32 @@ async function changeGuild(userId, newGuild) {
 
 // --- displayUserStatsRealtime ---
 export function displayUserStatsRealtime(userId, gemsElementId, tokensElementId, guildElementId) {
-    const userRef = ref(rtdb, `users/${userId}`); // Use Realtime Database ref
+    const userDocRef = doc(db, "users", userId); // Firestore ref
 
-    const unsubscribe = onValue(userRef, (snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            document.getElementById(gemsElementId).textContent = data.Gems || 0; // Use Realtime DB data
-            document.getElementById(tokensElementId).textContent = data.Tokens || 0;
-            document.getElementById(guildElementId).textContent = data.guild || 'None';
+    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            const gems = userData.Gems;
+            const tokens = userData.Tokens;
+            const guild = userData.guild || "No Guild";
+
+            document.getElementById(gemsElementId).textContent = gems;
+            document.getElementById(tokensElementId).textContent = tokens;
+            document.getElementById(guildElementId).textContent = guild;
 
             updateGuildButtonStates(userId); // Ensure buttons are updated
         } else {
-            console.log("No data available for user:", userId);
-            document.getElementById(gemsElementId).textContent = '0';
-            document.getElementById(tokensElementId).textContent = '0';
-            document.getElementById(guildElementId).textContent = 'None';
+            console.log("No such document! Initializing...");
              // Initialize user data if it doesn't exist
             initializeUserData(userId)
                 .then(() => {
                     // Retry displaying stats after initialization
-                   displayUserStatsRealtime(userId, gemsElementId, tokensElementId, guildElementId);
+                    displayUserStatsRealtime(userId, gemsElementId, tokensElementId, guildElementId);
                 })
                 .catch(err => console.error("Error initializing user data:", err));
-
         }
     }, (error) => {
-        console.error("Error listening for realtime updates:", error);
+        console.error("Error listening for document changes:", error);
         document.getElementById(gemsElementId).textContent = 'Error';
         document.getElementById(tokensElementId).textContent = 'Error';
         document.getElementById(guildElementId).textContent = 'Error';
@@ -112,7 +109,7 @@ export function displayUserStatsRealtime(userId, gemsElementId, tokensElementId,
 
 // --- Update Guild Button States ---
 async function updateGuildButtonStates(userId) {
-    const userDocRef = doc(db, "users", userId); // Firestore ref for cooldown check
+    const userDocRef = doc(db, "users", userId); // Firestore ref
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
@@ -131,29 +128,19 @@ async function updateGuildButtonStates(userId) {
         }
     }
 
-    const userRef = ref(rtdb, `users/${userId}`); //Realtime ref for token check
-    const snapshot = await get(userRef);
-
-    if(!snapshot.exists()){
-        return;
-    }
-    const rtdbData = snapshot.val();
-
     for (const guildName in guildData) {
-        const buttonId = `${guildName.toLowerCase().replace(/\s+/g, '-')}-button`;
-        const button = document.getElementById(buttonId);
-
+        const button = document.getElementById(`${guildName.toLowerCase().replace(/\s+/g, '-')}-button`);
         if (!button) {
             console.warn(`Button for guild "${guildName}" not found!`);
             continue;
         }
         const cost = guildData[guildName] ? guildData[guildName].cost : 10;
 
-        if (rtdbData.guild === guildName) {
+        if (userData.guild === guildName) {
             button.disabled = true;
             button.classList.add("current-guild");
             button.classList.remove("locked-guild");
-        } else if (isOnCoolDown || rtdbData.Tokens < cost) { //Use realtime database
+        } else if (isOnCoolDown || userData.Tokens < cost) {
             button.disabled = true;
             button.classList.add("locked-guild");
             button.classList.remove("current-guild");
@@ -173,24 +160,23 @@ export function stopListening(unsubscribeFunction) {
 
 // --- initializeUserData ---
 async function initializeUserData(userId) {
-    const userRef = ref(rtdb, `users/${userId}`); // Use Realtime Database ref
-    const snapshot = await get(userRef); // Use get for one-time read
-
-    if (!snapshot.exists()) {
+    const userDocRef = doc(db, "users", userId); // Firestore ref
+     const docSnap = await getDoc(userDocRef); //Use get to check
+    if (!docSnap.exists()) {
         const initialData = {
             Gems: 5,
             Tokens: 5,
             guild: "No Guild",
-            // lastGuildChange is not needed in Realtime DB, managed in Firestore
+            lastGuildChange: null, // Initialize lastGuildChange
             photourl: "https://lh3.googleusercontent.com/a/ACg8cd1c0lmuEOInmeFp6gsN1clfw6WgnGR4n03Cc", // Consider using auth.currentUser.photoURL
         };
 
         try {
-            await set(userRef, initialData); // Use set for Realtime Database
+            await setDoc(userDocRef, initialData); // Firestore setDoc
             console.log("User data initialized for:", userId);
         } catch (error) {
             console.error("Error initializing user data:", error);
-            throw error; // Re-throw to handle in calling function
+            throw error; // Re-throw for handling higher up
         }
     }
 }
@@ -218,11 +204,11 @@ export function setupGuildButtons(auth) {
 
 // --- Get User Data ---
 export async function getUserData(userId) {
-     const userRef = ref(rtdb, `users/${userId}`); //Use realtime ref
-    const snapshot = await get(userRef); // Use get
+    const userDocRef = doc(db, "users", userId);  // Firestore ref
+    const userDocSnap = await getDoc(userDocRef);
 
-    if (snapshot.exists()) {
-        return snapshot.val();
+    if (userDocSnap.exists()) {
+        return userDocSnap.data();
     } else {
         console.log("No such document!");
         return null;
@@ -230,14 +216,14 @@ export async function getUserData(userId) {
 }
 
 // --- Firestore functions for cards ---
-export async function fetchCardInstances(userId) { //make exportable
+export async function fetchCardInstances(userId) {
     const cardInstancesCollection = collection(db, 'CardInstances');
     const q = query(cardInstancesCollection, where('Owner', '==', userId));
-    const querySnapshot = await getDocs(q); // Use getDocs
+    const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data());
 }
 
-export async function fetchCardData(cardId) { //make exportable
+export async function fetchCardData(cardId) {
     const cardDocRef = doc(db, 'Cards', cardId);
     const cardDoc = await getDoc(cardDocRef);
     if (cardDoc.exists()) {
@@ -248,7 +234,7 @@ export async function fetchCardData(cardId) { //make exportable
     }
 }
 
-export function combineCardData(cardInstances, cardsData) { //make exportable
+export function combineCardData(cardInstances, cardsData) {
     return cardInstances.map(instance => {
         const card = cardsData.find(c => c.ID === instance.ID);
         if (card) {
@@ -259,4 +245,3 @@ export function combineCardData(cardInstances, cardsData) { //make exportable
         }
     });
 }
-import { get } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
