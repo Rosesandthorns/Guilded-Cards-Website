@@ -178,7 +178,7 @@
             imageElement.alt = card.name;
             cardElement.appendChild(imageElement);
 
-            const idElement = document.createElement('p');
+            const idElement = document.createElement('p');  //Keep showing ID for now
             idElement.textContent = card.ID;
             cardElement.appendChild(idElement);
 
@@ -215,7 +215,7 @@
                         //Card Display
                          try {
                             const cardInstances = await fetchCardInstances(user.uid);
-                            const cardsData = await Promise.all(cardInstances.map(instance => fetchCardData(instance.ID)));
+                            const cardsData = await Promise.all(cardInstances.map(instance => fetchCardData(instance.cardId))); // Use cardId
                             const cards = combineCardData(cardInstances, cardsData);
                             displayCards(cards);
                         } catch (error){
