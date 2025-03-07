@@ -178,9 +178,10 @@
             imageElement.alt = card.name;
             cardElement.appendChild(imageElement);
 
-            const idElement = document.createElement('p');  //Keep showing ID for now
-            idElement.textContent = card.ID;
-            cardElement.appendChild(idElement);
+            const detailsElement = document.createElement('p');
+            // Now includes Rarity from the instance.
+            detailsElement.textContent = `Name: ${card.name}, Local ID: ${card.localId}, Rarity: ${card.Rarity}`;
+            cardElement.appendChild(detailsElement);
 
             collectionSection.appendChild(cardElement);
           });
