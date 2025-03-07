@@ -128,11 +128,10 @@
                 // Consider showing an error message to the user here.
             }
         }
-        // Display User Data Function. Now ASYNCHRONOUS.
+        // Display User Data Function.
         async function displayUserData(user) {
             const profileImage = document.getElementById('profileImage');
             const userEmail = document.getElementById('userEmail');
-            //Removed unnecessary variables
 
             if (user) {
                 // Get user data from Firestore
@@ -140,7 +139,7 @@
 
                 if(userData) {
                     // Display profile image
-                    if (userData.photourl) { // Use the correct field name from Firestore
+                    if (userData.photourl) {
                         profileImage.src = userData.photourl;
                         profileImage.style.display = 'block';
                     }
@@ -149,11 +148,11 @@
                         profileImage.style.display = 'none';
                     }
 
-                    // Display user email from Firestore
-                    userEmail.textContent = user.email || 'No email available'; //From auth data
+                    // Display user email
+                    userEmail.textContent = user.email || 'No email available';
 
                 } else {
-                    // Handle case where Firestore data is missing (shouldn't happen normally)
+                    // Handle case where Firestore data is missing
                     profileImage.src = "";
                     profileImage.style.display = 'none';
                     userEmail.textContent = "Error: User data not found";
@@ -166,57 +165,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-
-            const gemTokenContainer = document.getElementById("gemTokenContainer");
-            const signInButton = document.getElementById("googleSignInButton");
-            setupGuildButtons(auth); // Call setupGuildButtons
-
-            onAuthStateChanged(auth, async (user) => { // Make the callback async
-
-                if (user) {
-                    const userId = user.uid;
-
-                    // Stop previous listener for stats
-                    if (unsubscribeStats) {
-                        stopListening(unsubscribeStats);
-                    }
-                    // Start listening and store unsubscribe for stats
-                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count", "guild-display");
-
-                    // Display profile data, AWAIT the call.
-                    await displayUserData(user);
-                    signInButton.querySelector("#button-text").textContent = "Sign Out";
-                    signInButton.onclick = signOutFromGoogle;
-
-                    // Fetch and display cards
-                    const cardInstances = await fetchCardInstances(user.uid);
-                    const cardsData = await Promise.all(cardInstances.map(instance => fetchCardData(instance.ID)));
-                    const cards = combineCardData(cardInstances, cardsData);
-                    displayCards(cards);
-
-                } else {
-                    // If user is not signed in
-                    if (unsubscribeStats) {
-                        stopListening(unsubscribeStats);
-                    }
-                    document.getElementById("gems-count").textContent = "";
-                    document.getElementById("tokens-count").textContent = "";
-                    document.getElementById("guild-display").textContent = "";
-
-                    signInButton.querySelector("#button-text").textContent = "Sign in with Google";
-                    signInButton.onclick = signInWithGoogle;
-                }
-                gemTokenContainer.classList.remove('loading');
-                signInButton.classList.remove('loading');
-
-            });
-
-            signInButton.onclick = signInWithGoogle; // Initial setup for the sign-in button.
-        });
-
         function displayCards(cards) {
           const collectionSection = document.getElementById('collectionSection');
+          collectionSection.innerHTML = ''; // Clear previous cards
+
           cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.classList.add('card');
@@ -233,6 +185,61 @@
             collectionSection.appendChild(cardElement);
           });
         }
+
+
+        document.addEventListener('DOMContentLoaded', async () => { // Make async
+
+            const gemTokenContainer = document.getElementById("gemTokenContainer");
+            const signInButton = document.getElementById("googleSignInButton");
+
+
+            await new Promise((resolve) => { // Add promise for onAuthStateChanged
+                onAuthStateChanged(auth, async (user) => { // Make the callback async
+
+                    if (user) {
+                        const userId = user.uid;
+
+                        // Stop previous listener for stats
+                        if (unsubscribeStats) {
+                            stopListening(unsubscribeStats);
+                        }
+                        // Start listening and store unsubscribe for stats
+                        unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count", "guild-display");
+
+                        // Display profile data, AWAIT the call.
+                        await displayUserData(user);
+                        signInButton.querySelector("#button-text").textContent = "Sign Out";
+                        signInButton.onclick = signOutFromGoogle;
+                        setupGuildButtons(auth);
+
+                        //Card Display
+                         try {
+                            const cardInstances = await fetchCardInstances(user.uid);
+                            const cardsData = await Promise.all(cardInstances.map(instance => fetchCardData(instance.ID)));
+                            const cards = combineCardData(cardInstances, cardsData);
+                            displayCards(cards);
+                        } catch (error){
+                            console.error("Error loading cards", error)
+                        }
+
+                    } else {
+                        // If user is not signed in
+                        if (unsubscribeStats) {
+                            stopListening(unsubscribeStats);
+                        }
+                        document.getElementById("gems-count").textContent = "";
+                        document.getElementById("tokens-count").textContent = "";
+                        document.getElementById("guild-display").textContent = "";
+
+                        signInButton.querySelector("#button-text").textContent = "Sign in with Google";
+                        signInButton.onclick = signInWithGoogle;
+                    }
+                resolve(); // Resolve after auth is handled
+                });
+            }); // End of IIFE and await
+            gemTokenContainer.classList.remove('loading');
+            signInButton.classList.remove('loading');
+        });
     </script>
 </body>
 </html>
