@@ -1,116 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guilded Cards - Home</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet"> 
-</head>
-<body>
-    <header>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="cards.html">Cards</a>
-            <a href="profile.html">Profile</a>
-            <div id="gemTokenContainer" class="loading">
-                <p><img src="Guildedicons/GuildedGem.png" alt="Gem Icon" class="currency-icon"> Gems: <span id="gems-count"></span><span class="loading-indicator">Loading...</span></p>
-                <p><img src="Guildedicons/GuildedToken.png" alt="Token Icon" class="currency-icon"> Tokens: <span id="tokens-count"></span><span class="loading-indicator">Loading...</span></p>
-                <p>Guild: <span id="guild-display"></span><span class="loading-indicator">Loading...</span></p>
-            </div>
-            <button id="googleSignInButton" class="loading">
-                <span id="button-text">Sign in with Google</span>
-                <span id="button-loading" class="loading-indicator">Loading...</span>
-            </button>
-        </nav>
-    </header>
-    <main>
-        <h1>Welcome to Guilded Cards!</h1>
-        <p>Explore and collect unique cards.</p>
-
-        <div class="background-container">
-            <img src="Guildedicons/Forge.png" alt="The Six Forges" class="forge-background">
-            <div class="dark-overlay"></div>
-            <div class="guild-selection-area">
-                <div class="scroll-text-container">
-                    <p class="scroll-text midnight-flame-text"> 
-                        The 6 Forges Lay in the Sky<br>
-                        One for every guild<br>
-                        One for every cry
-                    </p>
-                </div>
-                <div id="guild-buttons">
-                    <button id="golden-guild-button">Golden Guild</button>
-                    <button id="mystic-guild-button">Mystic Guild</button>
-                    <button id="justice-guild-button">Justice Guild</button>
-                    <button id="elemental-guild-button">Elemental Guild</button>
-                    <button id="invisible-guild-button">Invisible Guild</button>
-                    <button id="glass-guild-button">Glass Guild</button>
-                </div>
-            </div>
-        </div>
-        <div id="content"></div> 
-    </main>
-
-    <script type="module" src="CoinGemUserData.js"></script>
-    <script type="module">
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { displayUserStatsRealtime, stopListening, setupGuildButtons } from "./CoinGemUserData.js";
-
-        const auth = getAuth();
-        const googleProvider = new GoogleAuthProvider();
-        let unsubscribeStats;
-
-        async function signInWithGoogle() {
-            try {
-                await signInWithPopup(auth, googleProvider);
-            } catch (error) {
-                console.error("Error signing in with Google:", error);
-            }
-        }
-
-        async function signOutFromGoogle() {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Error signing out:", error);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const gemTokenContainer = document.getElementById("gemTokenContainer");
-            const signInButton = document.getElementById("googleSignInButton");
-
-            setupGuildButtons(auth); 
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    const userId = user.uid;
-                    if (unsubscribeStats) {
-                        stopListening(unsubscribeStats);
-                    }
-                    unsubscribeStats = displayUserStatsRealtime(userId, "gems-count", "tokens-count", "guild-display");
-
-                    signInButton.querySelector("#button-text").textContent = "Sign Out";
-                    signInButton.onclick = signOutFromGoogle;
-                } else {
-                    if (unsubscribeStats) {
-                        stopListening(unsubscribeStats);
-                    }
-                    document.getElementById("gems-count").textContent = "";
-                    document.getElementById("tokens-count").textContent = "";
-                    document.getElementById("guild-display").textContent = "";
-
-                    signInButton.querySelector("#button-text").textContent = "Sign in with Google";
-                    signInButton.onclick = signInWithGoogle;
-                }
-
-                gemTokenContainer.classList.remove('loading');
-                signInButton.classList.remove('loading');
-            });
-
-            signInButton.onclick = signInWithGoogle;
-        });
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/Guildedicons/GuildedGem.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guilded Cards</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

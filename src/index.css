@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Midnight Flame Gothic';
+  src: url('/MidnightFlameGothicDemo-1GWMM.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-100 text-gray-900;
+  }
+}
