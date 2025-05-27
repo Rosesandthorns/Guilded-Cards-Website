@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         'midnight': ['Midnight Flame Gothic', 'cursive'],
+        'uncial': ['Uncial Antiqua', 'cursive'],
       },
     },
   },
